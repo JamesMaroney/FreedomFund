@@ -1,0 +1,1305 @@
+/* ─── App Shell ─────────────────────────────────────────────────── */
+
+.app-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1;
+}
+
+/* Exiting screen must never intercept taps on the screen below it */
+.screen[data-exiting] {
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Home Screen ────────────────────────────────────────────────── */
+
+.home-screen {
+  padding: 0 20px 32px;
+  gap: 0;
+  align-items: center;
+  background:
+    radial-gradient(ellipse at 30% 10%, rgba(245, 200, 66, 0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 70% 80%, rgba(0, 214, 143, 0.05) 0%, transparent 60%),
+    var(--bg-primary);
+}
+
+.home-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 52px 4px 24px;
+  flex-shrink: 0;
+}
+
+.app-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+}
+
+.install-btn {
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+}
+
+/* ─── Rings tap button ───────────────────────────────────────────── */
+
+.rings-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  /* allow the SVG to breathe */
+  margin: 4px 0 12px;
+  border-radius: 50%;
+  /* subtle tap highlight */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ─── Centre content overlaid on the rings ───────────────────────── */
+
+.rings-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  pointer-events: none;
+}
+
+.rings-total-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.rings-total-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  font-weight: 500;
+  color: var(--accent-gold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 0 24px rgba(245, 200, 66, 0.35);
+}
+
+.rings-streak {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.rings-streak-fire {
+  font-size: 1rem;
+}
+
+.rings-streak-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--accent-orange);
+}
+
+.rings-tap-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  margin-top: 6px;
+}
+
+/* ─── Swipe area ─────────────────────────────────────────────────── */
+
+.rings-swipe-area {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  /* fixed height so history doesn't jump when swapping panels */
+  min-height: 310px;
+  margin-bottom: 8px;
+}
+
+/* Draggable strip — holds all panels side-by-side */
+.rings-track {
+  display: flex;
+  width: 200%;          /* 2 panels × 100% */
+  will-change: transform;
+  cursor: grab;
+}
+.rings-track:active {
+  cursor: grabbing;
+}
+
+.rings-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 50%;           /* 50% of track = 100% of viewport */
+  flex-shrink: 0;
+}
+
+/* ─── Legend panel ───────────────────────────────────────────────── */
+
+.rings-legend-panel {
+  justify-content: center;
+  padding: 20px 12px 0;
+  gap: 0;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.legend-row:last-of-type {
+  border-bottom: none;
+}
+
+.legend-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-name {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.06em;
+}
+
+.legend-row-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+.legend-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+}
+
+.legend-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* ─── Swipe hint + pip indicators ───────────────────────────────── */
+
+.rings-swipe-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--text-secondary);
+  opacity: 0.45;
+  margin-top: 10px;
+}
+
+.rings-pips {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.rings-pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-secondary);
+  opacity: 0.25;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.rings-pip.active {
+  opacity: 0.7;
+  transform: scale(1.3);
+}
+
+/* ─── Deposit History ────────────────────────────────────────────── */
+
+/* ─── History anchor — zero-size; sheet is position:fixed so it needs no space */
+
+.history-anchor {
+  width: 0;
+  height: 0;
+  overflow: visible;
+}
+
+/* ─── Deposit History sheet ──────────────────────────────────────── */
+
+/* All layout/sizing is driven by inline motion styles in the component */
+.deposit-history {
+  touch-action: none;   /* let framer-motion own all pointer events */
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+.deposit-history:active {
+  cursor: grabbing;
+}
+
+/* Header row */
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  padding: 12px 16px 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+}
+
+.history-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--text-secondary);
+}
+
+.history-heading {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  margin: 0;
+}
+
+/* Scrollable list wrapper */
+.history-list-wrap {
+  position: relative;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  flex: 1;           /* fills height when expanded */
+  padding: 0 12px 12px;
+}
+
+.history-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Gradient fade at bottom when collapsed */
+.history-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, var(--bg-primary));
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  background: var(--bg-elevated);
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+}
+
+.history-label {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.history-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--accent-gold);
+}
+
+.history-time {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.history-transferred {
+  font-size: 0.75rem;
+  color: var(--accent-green);
+  font-weight: 700;
+}
+
+/* ─── Amount Selector ────────────────────────────────────────────── */
+
+.amount-selector {
+  padding: 48px 24px 40px;
+  gap: 0;
+  background: var(--bg-primary);
+}
+
+.selector-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 6px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.06);
+}
+
+.selector-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.selector-subtitle {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 28px;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.preset-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.preset-chip:active {
+  border-color: var(--accent-gold);
+  background: var(--bg-elevated);
+}
+
+.chip-emoji {
+  font-size: 1.6rem;
+}
+
+.chip-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--accent-gold);
+}
+
+.chip-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+/* ─── Custom Amount Input ────────────────────────────────────────── */
+
+.custom-amount {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+}
+
+.custom-dollar {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+}
+
+.custom-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 1.2rem;
+  color: var(--text-primary);
+  min-width: 0;
+}
+
+.custom-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Remove number input arrows */
+.custom-input::-webkit-outer-spin-button,
+.custom-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.custom-submit {
+  background: var(--accent-gold);
+  border: none;
+  border-radius: 8px;
+  color: #0a0a0f;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+
+.custom-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.custom-error {
+  color: var(--accent-orange);
+  font-size: 0.8rem;
+  margin-top: 6px;
+  padding-left: 4px;
+}
+
+/* ─── Celebration Overlay ────────────────────────────────────────── */
+
+.celebration-overlay {
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.92);
+  backdrop-filter: blur(4px);
+  z-index: 10;
+}
+
+.milestone-flash {
+  position: absolute;
+  inset: 0;
+  background: var(--accent-gold);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.particles-container {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.celebration-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.celebration-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: clamp(3.5rem, 16vw, 6.5rem);
+  font-weight: 500;
+  color: var(--accent-gold);
+  text-shadow: 0 0 60px rgba(245, 200, 66, 0.5);
+  line-height: 1;
+}
+
+.celebration-label {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+.celebration-emoji {
+  font-size: 3rem;
+  margin-top: 8px;
+}
+
+/* ─── Transfer Screen ────────────────────────────────────────────── */
+
+.transfer-screen {
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-primary);
+  padding: 40px 32px;
+}
+
+.transfer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  width: 100%;
+  max-width: 360px;
+}
+
+.transfer-checkmark {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 2px solid var(--accent-green);
+  color: var(--accent-green);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+
+.transfer-heading {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.transfer-subheading {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.transfer-amount {
+  font-family: 'DM Mono', monospace;
+  color: var(--accent-gold);
+  font-weight: 500;
+}
+
+.transfer-cta-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.transfer-btn {
+  width: 100%;
+  padding: 18px 24px;
+  background: var(--accent-gold);
+  border: none;
+  border-radius: 16px;
+  color: #0a0a0f;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 8px;
+  letter-spacing: 0.02em;
+}
+
+.skip-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  cursor: pointer;
+  padding: 10px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ─── Milestone Toast ────────────────────────────────────────────── */
+
+.milestone-toast {
+  position: fixed;
+  top: 24px;
+  left: 16px;
+  right: 16px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--accent-gold);
+  border-radius: 14px;
+  padding: 16px 20px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(245, 200, 66, 0.2);
+  cursor: pointer;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Hamburger Button ───────────────────────────────────────────── */
+
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  padding: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.hamburger-btn:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hamburger-line {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--text-secondary);
+  border-radius: 2px;
+  transition: background 0.15s;
+}
+
+.hamburger-btn:hover .hamburger-line {
+  background: var(--text-primary);
+}
+
+/* ─── Settings Panel ─────────────────────────────────────────────── */
+
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+.settings-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(300px, 85vw);
+  background: var(--bg-elevated, #141414);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 201;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 32px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 56px 20px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  color: var(--text-secondary);
+}
+
+.settings-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.settings-close:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.settings-section {
+  padding: 24px 20px 8px;
+}
+
+.settings-section--muted {
+  opacity: 0.45;
+}
+
+/* ─── Settings: Goals ────────────────────────────────────────────── */
+
+.settings-goals-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-goal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.settings-goal-label {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  flex: 1;
+}
+
+.settings-goal-input-wrap {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 0 10px;
+  gap: 3px;
+  width: 100px;
+}
+
+.settings-goal-dollar {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.settings-goal-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-family: 'DM Mono', monospace;
+  font-size: 16px; /* ≥16px prevents iOS auto-zoom */
+  width: 100%;
+  padding: 8px 0;
+  text-align: right;
+}
+
+/* ─── Settings: Tip Presets ──────────────────────────────────────── */
+
+.settings-presets-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.settings-preset-row {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.settings-preset-row.editing {
+  border-color: rgba(255,255,255,0.14);
+}
+
+.settings-preset-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-preset-emoji { font-size: 1.1rem; flex-shrink: 0; }
+
+.settings-preset-name {
+  flex: 1;
+  font-size: 0.82rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settings-preset-amount {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--accent-gold);
+  flex-shrink: 0;
+}
+
+.settings-preset-chevron {
+  font-size: 0.55rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  margin-left: 4px;
+}
+
+/* Drag handle — sits on top of the left border */
+.settings-preset-drag-handle {
+  position: absolute;
+  left: -8px;
+  top: 22px;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-elevated, #1a1a24);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 4px;
+  color: rgba(255,255,255,0.35);
+  font-size: 0.7rem;
+  cursor: grab;
+  touch-action: none;
+  letter-spacing: -1px;
+  z-index: 1;
+  line-height: 1;
+}
+.settings-preset-drag-handle:active { cursor: grabbing; color: rgba(255,255,255,0.6); }
+
+.settings-preset-reorder-item {
+  list-style: none;
+  border-radius: 10px;
+  overflow: visible;
+}
+.settings-preset-reorder-item.editing {
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* Emoji + Amount on the same row */
+.settings-preset-row-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.settings-preset-form-inner {
+  padding: 4px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+.settings-preset-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-preset-field-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.settings-preset-text-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: var(--text-primary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 16px; /* ≥16px prevents iOS auto-zoom */
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.settings-preset-emoji-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  align-self: flex-start;
+}
+
+.settings-emoji-picker {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  width: 200px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+
+.settings-emoji-option {
+  background: transparent;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 6px;
+  transition: background 0.1s;
+}
+.settings-emoji-option:active { background: rgba(255,255,255,0.1); }
+
+.settings-preset-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-preset-save-btn {
+  background: rgba(80,200,140,0.1);
+  border: 1px solid rgba(80,200,140,0.35);
+  border-radius: 8px;
+  color: rgba(80,220,150,0.95);
+  font-size: 0.78rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+  padding: 7px 16px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.settings-preset-save-btn:active {
+  background: rgba(80,200,140,0.22);
+}
+
+.settings-preset-delete-btn {
+  background: rgba(220,80,80,0.06);
+  border: 1px solid rgba(220,80,80,0.2);
+  border-radius: 8px;
+  color: rgba(220,80,80,0.75);
+  font-size: 0.78rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.settings-add-preset-btn {
+  width: 100%;
+  padding: 9px 14px;
+  background: rgba(255,255,255,0.03);
+  border: 1px dashed rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.settings-add-preset-btn:active { background: rgba(255,255,255,0.07); }
+
+/* ─── Settings: Bank placeholder ─────────────────────────────────── */
+
+.settings-placeholder-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px dashed rgba(255,255,255,0.08);
+  border-radius: 10px;
+}
+
+.settings-placeholder-icon { font-size: 1.3rem; }
+
+.settings-placeholder-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.settings-section-label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  color: var(--text-secondary);
+  margin-bottom: 14px;
+}
+
+.settings-audio-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-audio-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  text-align: left;
+}
+
+.settings-audio-btn:active {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.settings-audio-btn.selected {
+  border-color: var(--accent-gold, #f5c842);
+  background: rgba(245, 200, 66, 0.07);
+}
+
+.settings-audio-btn-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-audio-emoji {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.settings-audio-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-audio-label {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-audio-desc {
+  font-size: 0.72rem;
+  color: var(--text-secondary);
+}
+
+.settings-audio-btn-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-audio-check {
+  font-size: 0.85rem;
+  color: var(--accent-gold, #f5c842);
+  font-weight: 700;
+}
+
+.settings-preview-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  padding: 0;
+  padding-left: 2px; /* nudge the ▶ triangle to look centred */
+}
+
+.settings-preview-btn:active {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.settings-coming-soon {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* ─── Settings: Danger Zone ──────────────────────────────────────── */
+
+.settings-danger-section {
+  margin-top: auto;
+  padding-top: 24px;
+  padding-bottom: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-danger-section .settings-section-label {
+  color: rgba(220, 80, 80, 0.7);
+}
+
+.settings-reset-btn {
+  width: 100%;
+  padding: 11px 14px;
+  background: rgba(220, 80, 80, 0.08);
+  border: 1px solid rgba(220, 80, 80, 0.3);
+  border-radius: 10px;
+  color: rgba(220, 80, 80, 0.85);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.settings-reset-btn:active {
+  background: rgba(220, 80, 80, 0.15);
+  border-color: rgba(220, 80, 80, 0.55);
+}
+
+.settings-reset-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-reset-warning {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.settings-reset-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-reset-confirm-btn {
+  flex: 1;
+  padding: 10px 8px;
+  background: rgba(220, 80, 80, 0.15);
+  border: 1px solid rgba(220, 80, 80, 0.5);
+  border-radius: 10px;
+  color: rgb(220, 80, 80);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-reset-confirm-btn:active {
+  background: rgba(220, 80, 80, 0.28);
+}
+
+.settings-reset-cancel-btn {
+  flex: 1;
+  padding: 10px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text-secondary);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.settings-reset-cancel-btn:active {
+  background: rgba(255, 255, 255, 0.09);
+}
