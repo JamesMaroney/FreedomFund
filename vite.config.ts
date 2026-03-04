@@ -2,12 +2,17 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import basicSsl from '@vitejs/plugin-basic-ssl'
+import { execSync } from 'child_process'
 
 const isProd = process.env.NODE_ENV === 'production'
+const gitHash = execSync('git rev-parse HEAD').toString().trim().slice(0, 8)
 
 // https://vite.dev/config/
 export default defineConfig({
   base: isProd ? '/FreedomFund/' : '/',
+  define: {
+    __GIT_HASH__: JSON.stringify(gitHash),
+  },
   plugins: [
     !isProd && basicSsl(),
     react(),

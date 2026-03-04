@@ -191,13 +191,7 @@ export default function HomeScreen({
             <span className="hamburger-line" />
           </button>
           <span className="app-title">FREEDOM FUND</span>
-          {installPrompt ? (
-            <button className="install-btn" onClick={onInstall}>
-              Add to Home Screen
-            </button>
-          ) : (
-            <div style={{ width: 36 }} />
-          )}
+          <div style={{ width: 36 }} />
         </div>
 
         {/* ── Carousel viewport ── */}
@@ -316,6 +310,31 @@ export default function HomeScreen({
           <button className="home-transfer-nudge" onClick={onSendToAlly}>
             Transfer {formatCents(unsentCents)} to Ally →
           </button>
+        )}
+
+        {fundState.deposits.length === 0 && <div className="home-main-col-spacer" />}
+
+        {/* ── Empty state intro card ── */}
+        {fundState.deposits.length === 0 && (
+          <div className="empty-intro-card">
+            <p className="empty-intro-desc">
+              Pay yourself every time you skip an impulse purchase — and watch
+              your freedom fund grow.
+            </p>
+            <a
+              className="empty-intro-readme"
+              href="https://github.com/JamesMaroney/FreedomFund#readme"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Learn more ↗
+            </a>
+            {installPrompt && (
+              <button className="empty-intro-install" onClick={onInstall}>
+                Add to Home Screen
+              </button>
+            )}
+          </div>
         )}
 
         {fundState.deposits.length === 0 && <div className="home-main-col-spacer" />}

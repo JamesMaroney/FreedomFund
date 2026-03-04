@@ -180,6 +180,58 @@
   letter-spacing: 0.03em;
 }
 
+.empty-intro-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 24px;
+  margin: 0 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  text-align: center;
+}
+
+.empty-intro-desc {
+  margin: 0;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.empty-intro-readme {
+  font-family: "DM Mono", monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-gold);
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.empty-intro-readme:hover {
+  opacity: 1;
+}
+
+.empty-intro-install {
+  background: none;
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background 0.15s;
+}
+.empty-intro-install:active {
+  background: rgba(245, 200, 66, 0.1);
+}
+
 /* ─── Rings tap button ───────────────────────────────────────────── */
 
 .rings-btn {
@@ -1548,8 +1600,18 @@
 .settings-danger-section {
   margin-top: auto;
   padding-top: 24px;
-  padding-bottom: 32px;
+  padding-bottom: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.settings-version {
+  font-family: "DM Mono", monospace;
+  font-size: 0.6rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.35));
+  text-align: center;
+  padding: 8px 0 20px;
+  letter-spacing: 0.12em;
+  opacity: 0.5;
 }
 
 .settings-danger-section .settings-section-label {

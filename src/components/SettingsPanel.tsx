@@ -622,6 +622,8 @@ export default function SettingsPanel({
                   </div>
                 )}
               </div>
+
+              <div className="settings-version">{__GIT_HASH__}</div>
             </div>
           </motion.div>
         </>
