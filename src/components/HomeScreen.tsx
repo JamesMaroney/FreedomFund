@@ -1,4 +1,4 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState } from "../types";
 import { formatCents } from "../utils/currency";
@@ -129,19 +129,16 @@ export default function HomeScreen({
 
   const [dragLeft, setDragLeft] = useState(-(PANEL_COUNT - 1) * 300);
   const isLandscape = useIsLandscape();
+  const [suppressAnimation, setSuppressAnimation] = useState(false);
   const prevLandscapeRef = useRef(isLandscape);
-  const [_suppressTick, setSuppressTick] = useState(0);
-  const suppressUntilRef = useRef(0);
 
-  // Derive suppressAnimation synchronously during render — no state lag.
-  // When isLandscape changes, mark a suppress window and schedule its end.
-  if (prevLandscapeRef.current !== isLandscape) {
+  useEffect(() => {
+    if (prevLandscapeRef.current === isLandscape) return;
     prevLandscapeRef.current = isLandscape;
-    suppressUntilRef.current = Date.now() + 600;
-    // Schedule a re-render after the window expires to clear it
-    setTimeout(() => setSuppressTick((n) => n + 1), 620);
-  }
-  const suppressAnimation = Date.now() < suppressUntilRef.current;
+    const t1 = setTimeout(() => setSuppressAnimation(true), 0);
+    const t2 = setTimeout(() => setSuppressAnimation(false), 600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, [isLandscape]);
 
   const snapToPage = (target: number) => {
     const w = containerW.current || containerRef.current?.offsetWidth || 300;
@@ -174,7 +171,7 @@ export default function HomeScreen({
 
   return (
     <motion.div
-      className={`screen home-screen${isLandscape ? " home-screen--landscape" : ""}`}
+      className={`screen home-screen${isLandscape ? " home-screen--landscape" : ""}${fundState.deposits.length === 0 ? " home-screen--no-history" : ""}`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0, pointerEvents: "none" }}
@@ -204,6 +201,7 @@ export default function HomeScreen({
         </div>
 
         {/* ── Carousel viewport ── */}
+        {fundState.deposits.length === 0 && <div className="home-main-col-spacer" />}
         <div className="rings-swipe-area" ref={containerRef}>
           {/* Draggable track — both panels sit side-by-side inside */}
           <motion.div
@@ -319,6 +317,8 @@ export default function HomeScreen({
             Transfer {formatCents(unsentCents)} to Ally →
           </button>
         )}
+
+        {fundState.deposits.length === 0 && <div className="home-main-col-spacer" />}
 
         {/* Portrait-only history anchor (fixed bottom sheet) */}
         {!isLandscape && fundState.deposits.length > 0 && (

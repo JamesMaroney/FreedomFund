@@ -75,6 +75,16 @@
   align-items: center;
 }
 
+/* No deposits: main col expands full width in landscape */
+.home-screen--landscape.home-screen--no-history .home-main-col {
+  width: 100%;
+}
+
+/* Spacer used to vertically center the carousel when there's no deposit history */
+.home-main-col-spacer {
+  flex: 1;
+}
+
 .home-screen--landscape .rings-swipe-area {
   min-height: unset;
   margin-bottom: 4px;
