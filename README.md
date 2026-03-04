@@ -1,73 +1,77 @@
-# React + TypeScript + Vite
+# 💸 Freedom Fund
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Pay yourself every time you skip an impulse purchase — and watch your freedom fund grow.**
 
-Currently, two official plugins are available:
+[**Open the app →**](https://jamesmaroney.github.io/FreedomFund/)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## What is this?
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Freedom Fund is a small personal finance PWA built around one idea: **every time you resist spending money, you pay yourself that amount instead.**
 
-## Expanding the ESLint configuration
+Skipped a $6 coffee? Tap the ring, log it. Left a $25 Amazon order in the cart? Log it. Over time, those near-misses add up into real savings — and the app keeps you accountable with daily, weekly, and monthly goals.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## How to use it
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### 1. Install to your home screen (recommended)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Freedom Fund works best as a home screen app so it's always one tap away:
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **iPhone (Safari):** tap the Share button → _Add to Home Screen_
+- **Android (Chrome):** tap the three-dot menu → _Add to Home Screen_, or use the install prompt in the app
+- **Desktop (Chrome/Edge):** click the install icon in the address bar
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 2. Log a skip
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Whenever you resist a purchase, open the app and **tap the rings** in the centre of the screen. A chip selector will appear with preset amounts — pick the one that matches what you didn't spend (or set up your own in Settings).
+
+### 3. Watch your rings fill
+
+Three activity rings track your progress:
+
+| Ring       | Goal                                         |
+| ---------- | -------------------------------------------- |
+| 🔴 Monthly | $400 / month                                 |
+| 🟡 Weekly  | Escalating target ($50 → $325 over 12 weeks) |
+| 🟢 Daily   | $10 / day                                    |
+
+Each ring fills as you log skips. Complete a ring and it starts a new lap — tracked with a ×2, ×3 multiplier.
+
+### 4. Build your streak
+
+Log at least one skip per day to keep your 🔥 streak alive. Miss a day and it resets.
+
+### 5. Transfer to savings
+
+When you're ready to move your accumulated balance to savings, tap **Transfer to Ally →**. The exact amount is copied to your clipboard, and Ally Bank opens in a new tab — just paste it into the transfer amount field. Once done, mark it as sent — the balance clears and you start fresh.
+
+---
+
+## Settings
+
+Open the ☰ menu (top left) to:
+
+- **Set your weekly goal** — defaults to a 12-week escalating challenge starting at $50/week
+- **Customize skip presets** — edit the amounts, labels, and emojis that appear when you tap the rings
+- **Reset unsent balance** — zero out accumulated deposits that haven't been transferred yet
+
+---
+
+## Milestones
+
+The app celebrates when your all-time total crosses $50, $100, $250, $500, $1,000, $2,000, and $5,000.
+
+---
+
+## Feedback & bugs
+
+Found something broken? Have a suggestion? [Open an issue on GitHub](https://github.com/JamesMaroney/FreedomFund/issues) — all feedback welcome.
+
+---
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for technical setup, architecture notes, and how to run the project locally.
