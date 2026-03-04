@@ -72,6 +72,12 @@ Found something broken? Have a suggestion? [Open an issue on GitHub](https://git
 
 ---
 
+## Security
+
+No account, no server, no bank access — your data never leaves your device. See [SECURITY.md](./SECURITY.md) for a full breakdown.
+
+---
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for technical setup, architecture notes, and how to run the project locally.
