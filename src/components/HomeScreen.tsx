@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useMemo } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState } from "../types";
 import { formatCents } from "../utils/currency";
@@ -130,7 +130,7 @@ export default function HomeScreen({
   const [dragLeft, setDragLeft] = useState(-(PANEL_COUNT - 1) * 300);
   const isLandscape = useIsLandscape();
   const prevLandscapeRef = useRef(isLandscape);
-  const [suppressTick, setSuppressTick] = useState(0);
+  const [_suppressTick, setSuppressTick] = useState(0);
   const suppressUntilRef = useRef(0);
 
   // Derive suppressAnimation synchronously during render — no state lag.

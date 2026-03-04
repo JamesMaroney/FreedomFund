@@ -3,10 +3,13 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 
+const isProd = process.env.NODE_ENV === 'production'
+
 // https://vite.dev/config/
 export default defineConfig({
+  base: isProd ? '/FreedomFund/' : '/',
   plugins: [
-    basicSsl(),
+    !isProd && basicSsl(),
     react(),
     VitePWA({
       registerType: 'autoUpdate',
