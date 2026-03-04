@@ -66,10 +66,26 @@
 .home-screen--landscape .home-main-col {
   flex: 0 0 auto;
   width: 55%;
-  padding: 0 16px 16px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 8px;
+  overflow: hidden;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.home-screen--landscape .rings-swipe-area {
+  min-height: unset;
+  margin-bottom: 4px;
+}
+
+.home-screen--landscape .rings-btn {
+  margin: 2px 0 6px;
+}
+
+.home-screen--landscape .home-transfer-nudge {
+  margin-top: 2px;
 }
 
 .home-history-col {
@@ -110,6 +126,27 @@
 
 .home-screen--landscape .home-header {
   padding: 16px 4px 12px;
+}
+
+.home-transfer-nudge {
+  display: block;
+  width: fit-content;
+  margin: 0 auto;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  font-family: "DM Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s;
+}
+.home-transfer-nudge:active {
+  opacity: 1;
 }
 
 .app-title {
@@ -943,7 +980,6 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  margin-bottom: 10px;
 }
 
 .settings-preset-row {
@@ -1157,6 +1193,7 @@
 }
 
 .settings-add-preset-btn {
+  margin-top: 6px;
   width: 100%;
   padding: 9px 14px;
   background: rgba(255, 255, 255, 0.03);
@@ -1219,6 +1256,90 @@
   letter-spacing: -0.01em;
 }
 
+.settings-section--no-label {
+  padding-top: 0;
+}
+
+.transfer-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.transfer-confirm-card {
+  background: #1c1c2e;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 32px 24px 24px;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.transfer-confirm-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.transfer-confirm-question {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.transfer-confirm-amount {
+  font-family: "DM Mono", monospace;
+  color: var(--accent-gold);
+  font-size: 1.3rem;
+  font-weight: 500;
+}
+
+.transfer-confirm-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.transfer-confirm-btn {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.transfer-confirm-btn:active {
+  opacity: 0.8;
+}
+.transfer-confirm-btn--yes {
+  background: rgba(100, 220, 120, 0.15);
+  border: 1px solid rgba(100, 220, 120, 0.3);
+  color: #6ddc7f;
+}
+.transfer-confirm-btn--no {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
 .settings-bank-send-btn {
   display: block;
   width: 100%;
@@ -1237,6 +1358,47 @@
 }
 .settings-bank-send-btn:active {
   background: rgba(245, 200, 66, 0.2);
+}
+.settings-bank-send-hint {
+  font-weight: 400;
+  font-size: 0.75rem;
+  opacity: 0.65;
+}
+
+.settings-bank-confirm-hint {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.settings-bank-confirm-actions {
+  display: flex;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+.settings-bank-confirm-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.settings-bank-confirm-btn--yes {
+  background: rgba(100, 220, 120, 0.12);
+  color: #6ddc7f;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+}
+.settings-bank-confirm-btn--yes:active {
+  background: rgba(100, 220, 120, 0.22);
+}
+.settings-bank-confirm-btn--no {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+}
+.settings-bank-confirm-btn--no:active {
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .settings-placeholder-card {

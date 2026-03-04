@@ -13,6 +13,7 @@ interface Props {
   rings: Ring[];
   size?: number;
   gap?: number;
+  disableAnimation?: boolean;
 }
 
 const TAU = Math.PI * 2;
@@ -42,9 +43,16 @@ const SPIKE_INNER = 7; // px from centre of head
 const SPIKE_OUTER = 14; // px from centre of head
 const LAP_RING_GAP = 4; // px between active ring centre and each completion ring centre
 
-export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
+export default function ActivityRings({
+  rings,
+  size = 260,
+  gap = 14,
+  disableAnimation = false,
+}: Props) {
   const cx = size / 2;
   const cy = size / 2;
+
+  const instant = { duration: 0 } as const;
 
   // Space rings evenly: outermost first
   // Each ring needs room for track + head burst; use gap between ring centres
@@ -122,11 +130,15 @@ export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
                     transform={`rotate(-90 ${cx} ${cy})`}
                     filter={`url(#glow-${i})`}
                     animate={{ strokeDashoffset: 0 }}
-                    transition={{
-                      duration: 1.0,
-                      ease: [0.22, 1.2, 0.36, 1],
-                      delay: i * 0.1 + 0.05,
-                    }}
+                    transition={
+                      disableAnimation
+                        ? instant
+                        : {
+                            duration: 1.0,
+                            ease: [0.22, 1.2, 0.36, 1],
+                            delay: i * 0.1 + 0.05,
+                          }
+                    }
                   />
                 );
               })}
@@ -144,11 +156,15 @@ export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
               strokeDashoffset={circumference}
               transform={`rotate(-90 ${cx} ${cy})`}
               animate={{ strokeDashoffset: circumference * (1 - arcFraction) }}
-              transition={{
-                duration: 1.1,
-                ease: [0.22, 1.2, 0.36, 1],
-                delay: i * 0.1,
-              }}
+              transition={
+                disableAnimation
+                  ? instant
+                  : {
+                      duration: 1.1,
+                      ease: [0.22, 1.2, 0.36, 1],
+                      delay: i * 0.1,
+                    }
+              }
             />
 
             {/* ── Laser-burst head ── */}
@@ -194,11 +210,15 @@ export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
                           x2: s.x2,
                           y2: s.y2,
                         }}
-                        transition={{
-                          duration: 0.45,
-                          ease: "easeOut",
-                          delay: i * 0.1 + 0.75,
-                        }}
+                        transition={
+                          disableAnimation
+                            ? instant
+                            : {
+                                duration: 0.45,
+                                ease: "easeOut",
+                                delay: i * 0.1 + 0.75,
+                              }
+                        }
                       />
                     ))}
 
@@ -210,11 +230,15 @@ export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
                       fill={ring.color}
                       fillOpacity={0.2}
                       animate={{ r: HEAD_R + 4 }}
-                      transition={{
-                        duration: 0.4,
-                        ease: "easeOut",
-                        delay: i * 0.1 + 0.7,
-                      }}
+                      transition={
+                        disableAnimation
+                          ? instant
+                          : {
+                              duration: 0.4,
+                              ease: "easeOut",
+                              delay: i * 0.1 + 0.7,
+                            }
+                      }
                     />
 
                     {/* Core dot */}
@@ -224,11 +248,15 @@ export default function ActivityRings({ rings, size = 260, gap = 14 }: Props) {
                       r={0}
                       fill={ring.color}
                       animate={{ r: HEAD_R }}
-                      transition={{
-                        duration: 0.35,
-                        ease: [0.34, 1.56, 0.64, 1],
-                        delay: i * 0.1 + 0.72,
-                      }}
+                      transition={
+                        disableAnimation
+                          ? instant
+                          : {
+                              duration: 0.35,
+                              ease: [0.34, 1.56, 0.64, 1],
+                              delay: i * 0.1 + 0.72,
+                            }
+                      }
                     />
                   </g>
                 );

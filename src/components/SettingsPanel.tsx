@@ -5,7 +5,7 @@ import {
   Reorder,
   useDragControls,
 } from "framer-motion";
-import type { AudioClip, TipPreset, Goals, Deposit } from "../types";
+import type { AudioClip, TipPreset, Goals } from "../types";
 import {
   playCoinSound,
   playTadaSound,
@@ -24,7 +24,7 @@ interface Props {
   onGoalsChange: (g: Goals) => void;
   tipPresets: TipPreset[];
   onTipPresetsChange: (p: TipPreset[]) => void;
-  deposits: Deposit[];
+  unsentCents: number;
   onSendToAlly: () => void;
   onReset: () => void;
 }
@@ -412,7 +412,7 @@ function TipPresetsSection({
         values={presets}
         onReorder={onChange}
         className="settings-presets-list"
-        style={{ listStyle: "none", padding: 0, margin: 0 }}
+        style={{ listStyle: "none", padding: 0 }}
       >
         {presets.map((preset) => (
           <PresetItem
@@ -450,15 +450,11 @@ export default function SettingsPanel({
   onGoalsChange,
   tipPresets,
   onTipPresetsChange,
-  deposits,
+  unsentCents,
   onSendToAlly,
   onReset,
 }: Props) {
   const [confirmingReset, setConfirmingReset] = useState(false);
-
-  const unsentCents = deposits
-    .filter((d) => !d.transferred)
-    .reduce((sum, d) => sum + d.amount, 0);
 
   const handlePreview = (clip: AudioClip) => {
     const fn = PREVIEW_FN[clip];
@@ -507,7 +503,33 @@ export default function SettingsPanel({
 
             {/* Scrollable body */}
             <div className="settings-body">
-              {/* ── Celebration Sound ── */}
+              {/* ── Bank ── */}
+              {unsentCents > 0 && (
+                <div className="settings-section settings-section--no-label">
+                  <div className="settings-bank-card">
+                    <div className="settings-bank-card-top">
+                      <span className="settings-bank-icon">🏦</span>
+                      <div className="settings-bank-text">
+                        <span className="settings-bank-label">
+                          Unsent balance
+                        </span>
+                        <span className="settings-bank-amount">
+                          {formatCents(unsentCents)}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      className="settings-bank-send-btn"
+                      onClick={() => {
+                        onSendToAlly();
+                        onClose();
+                      }}
+                    >
+                      Send to Ally →
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="settings-section">
                 <span className="settings-section-label">
                   CELEBRATION SOUND
@@ -562,42 +584,6 @@ export default function SettingsPanel({
                 presets={tipPresets}
                 onChange={onTipPresetsChange}
               />
-
-              {/* ── Bank ── */}
-              <div className="settings-section">
-                <span className="settings-section-label">BANK</span>
-                {unsentCents > 0 ? (
-                  <div className="settings-bank-card">
-                    <div className="settings-bank-card-top">
-                      <span className="settings-bank-icon">🏦</span>
-                      <div className="settings-bank-text">
-                        <span className="settings-bank-label">
-                          Unsent balance
-                        </span>
-                        <span className="settings-bank-amount">
-                          {formatCents(unsentCents)}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      className="settings-bank-send-btn"
-                      onClick={() => {
-                        onSendToAlly();
-                        onClose();
-                      }}
-                    >
-                      Send to Ally →
-                    </button>
-                  </div>
-                ) : (
-                  <div className="settings-placeholder-card">
-                    <span className="settings-placeholder-icon">🏦</span>
-                    <span className="settings-placeholder-text">
-                      No unsent funds — you're all caught up!
-                    </span>
-                  </div>
-                )}
-              </div>
 
               {/* ── Danger Zone ── */}
               <div className="settings-section settings-danger-section">

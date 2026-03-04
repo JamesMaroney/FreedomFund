@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState } from "../types";
 import { formatCents } from "../utils/currency";
@@ -14,6 +14,8 @@ interface Props {
   onOpenSettings: () => void;
   installPrompt: boolean;
   onInstall: () => void;
+  unsentCents: number;
+  onSendToAlly: () => void;
 }
 
 // ─── Goal helpers ────────────────────────────────────────────────────────────
@@ -80,6 +82,8 @@ export default function HomeScreen({
   onOpenSettings,
   installPrompt,
   onInstall,
+  unsentCents,
+  onSendToAlly,
 }: Props) {
   const { displayStreak, depositedToday } = useStreak({
     currentStreak: fundState.currentStreak,
@@ -122,6 +126,20 @@ export default function HomeScreen({
 
   const [dragLeft, setDragLeft] = useState(-(PANEL_COUNT - 1) * 300);
   const isLandscape = useIsLandscape();
+  const [suppressAnimation, setSuppressAnimation] = useState(false);
+  const prevLandscapeRef = useRef(isLandscape);
+
+  useEffect(() => {
+    if (prevLandscapeRef.current !== isLandscape) {
+      prevLandscapeRef.current = isLandscape;
+      const t1 = setTimeout(() => setSuppressAnimation(true), 0);
+      const t2 = setTimeout(() => setSuppressAnimation(false), 600);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [isLandscape]);
 
   const snapToPage = (target: number) => {
     const w = containerW.current || containerRef.current?.offsetWidth || 300;
@@ -205,10 +223,18 @@ export default function HomeScreen({
                 transition={{ type: "spring", stiffness: 400, damping: 20 }}
                 aria-label="Fund yourself"
               >
-                <ActivityRings rings={rings} size={260} gap={14} />
+                <ActivityRings
+                  key={isLandscape ? "landscape" : "portrait"}
+                  rings={rings}
+                  size={isLandscape ? 210 : 260}
+                  gap={isLandscape ? 10 : 14}
+                  disableAnimation={suppressAnimation}
+                />
 
                 <div className="rings-centre">
-                  <span className="rings-total-label">TOTAL SAVED</span>
+                  <span className="rings-total-label">
+                    {!isLandscape && "TOTAL SAVED"}
+                  </span>
                   <motion.span
                     className="rings-total-amount"
                     key={fundState.totalSaved}
@@ -238,7 +264,9 @@ export default function HomeScreen({
                     </motion.div>
                   )}
 
-                  <span className="rings-tap-hint">TAP TO FUND</span>
+                  {!isLandscape && (
+                    <span className="rings-tap-hint">TAP TO FUND</span>
+                  )}
                 </div>
               </motion.button>
             </div>
@@ -283,6 +311,13 @@ export default function HomeScreen({
             ))}
           </div>
         </div>
+
+        {/* ── Transfer nudge ── */}
+        {unsentCents > 0 && (
+          <button className="home-transfer-nudge" onClick={onSendToAlly}>
+            Transfer {formatCents(unsentCents)} to Ally →
+          </button>
+        )}
 
         {/* Portrait-only history anchor (fixed bottom sheet) */}
         {!isLandscape && fundState.deposits.length > 0 && (

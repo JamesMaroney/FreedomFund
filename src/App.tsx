@@ -1,5 +1,5 @@
-import { useReducer, useCallback, useEffect, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useReducer, useCallback, useEffect, useState, useRef } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { useCelebration } from "./hooks/useCelebration";
 import { calculateNewStreak, getTodayString } from "./hooks/useStreak";
@@ -89,6 +89,8 @@ export default function App() {
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [transferPending, setTransferPending] = useState(false);
+  const awaitingTransferReturn = useRef(false);
   const [audioClip, setAudioClip] = useLocalStorage<AudioClip>(
     "freedom-fund-audio-clip",
     "coins",
@@ -104,7 +106,25 @@ export default function App() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (
+        document.visibilityState === "visible" &&
+        awaitingTransferReturn.current
+      ) {
+        awaitingTransferReturn.current = false;
+        setTransferPending(true);
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
   const handleTipYourself = useCallback(() => {
+    // Prime audio here (first gesture) so the AudioContext is fully running
+    // by the time the celebration sound fires on the chip-tap (second gesture).
+    primeAudio();
     dispatch({ type: "OPEN_SELECTOR" });
   }, []);
 
@@ -142,9 +162,6 @@ export default function App() {
 
       setLastDepositId(deposit.id);
       dispatch({ type: "CONFIRM_DEPOSIT", amount, label });
-
-      // primeAudio must run synchronously inside the gesture handler
-      primeAudio();
 
       if (newMilestone) {
         setMilestoneHit(newMilestone);
@@ -207,6 +224,22 @@ export default function App() {
             onOpenSettings={() => setSettingsOpen(true)}
             installPrompt={installPrompt !== null}
             onInstall={handleInstallPWA}
+            unsentCents={fundState.deposits
+              .filter((d) => !d.transferred)
+              .reduce((sum, d) => sum + d.amount, 0)}
+            onSendToAlly={() => {
+              const amount = fundState.deposits
+                .filter((d) => !d.transferred)
+                .reduce((sum, d) => sum + d.amount, 0);
+              navigator.clipboard
+                .writeText(`${(amount / 100).toFixed(2)}`)
+                .catch(() => {});
+              awaitingTransferReturn.current = true;
+              const a = document.createElement("a");
+              a.href = "https://secure.ally.com/payments/transfers#";
+              a.rel = "noopener noreferrer";
+              a.click();
+            }}
           />
         )}
         {ui.screen === "SELECTING_AMOUNT" && (
@@ -246,6 +279,64 @@ export default function App() {
         )}
       </AnimatePresence>
 
+      <AnimatePresence>
+        {transferPending && (
+          <motion.div
+            key="transfer-confirm"
+            className="transfer-confirm-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <motion.div
+              className="transfer-confirm-card"
+              initial={{ scale: 0.92, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.92, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            >
+              <span className="transfer-confirm-icon">🏦</span>
+              <p className="transfer-confirm-question">
+                Did{" "}
+                <span className="transfer-confirm-amount">
+                  {(() => {
+                    const cents = fundState.deposits
+                      .filter((d) => !d.transferred)
+                      .reduce((sum, d) => sum + d.amount, 0);
+                    return `$${(cents / 100).toFixed(2)}`;
+                  })()}
+                </span>{" "}
+                go through?
+              </p>
+              <div className="transfer-confirm-actions">
+                <button
+                  className="transfer-confirm-btn transfer-confirm-btn--yes"
+                  onClick={() => {
+                    setFundState((prev) => ({
+                      ...prev,
+                      deposits: prev.deposits.map((d) => ({
+                        ...d,
+                        transferred: true,
+                      })),
+                    }));
+                    setTransferPending(false);
+                  }}
+                >
+                  Yes, lock it in 🔒
+                </button>
+                <button
+                  className="transfer-confirm-btn transfer-confirm-btn--no"
+                  onClick={() => setTransferPending(false)}
+                >
+                  Not yet
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <SettingsPanel
         isOpen={settingsOpen}
         onClose={() => setSettingsOpen(false)}
@@ -259,10 +350,22 @@ export default function App() {
         onTipPresetsChange={(p: TipPreset[]) =>
           setFundState((prev) => ({ ...prev, tipPresets: p }))
         }
-        deposits={fundState.deposits}
-        onSendToAlly={() =>
-          window.open("https://ally.com", "_blank", "noopener,noreferrer")
-        }
+        unsentCents={fundState.deposits
+          .filter((d) => !d.transferred)
+          .reduce((sum, d) => sum + d.amount, 0)}
+        onSendToAlly={() => {
+          const amount = fundState.deposits
+            .filter((d) => !d.transferred)
+            .reduce((sum, d) => sum + d.amount, 0);
+          navigator.clipboard
+            .writeText(`${(amount / 100).toFixed(2)}`)
+            .catch(() => {});
+          awaitingTransferReturn.current = true;
+          const a = document.createElement("a");
+          a.href = "https://secure.ally.com/payments/transfers#";
+          a.rel = "noopener noreferrer";
+          a.click();
+        }}
         onReset={handleReset}
       />
     </div>
