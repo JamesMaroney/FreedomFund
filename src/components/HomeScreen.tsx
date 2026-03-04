@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState } from "../types";
 import { formatCents } from "../utils/currency";
@@ -100,46 +100,48 @@ export default function HomeScreen({
   const weeklyProg = getWeeklyProgress(fundState.deposits);
   const dailyProg = getDailyProgress(fundState.deposits);
 
-  const rings = [
-    {
-      progress: monthlyProg / MONTHLY_GOAL_CENTS,
-      color: RING_COLORS[0],
-      trackColor: RING_TRACKS[0],
-      label: "Monthly",
-      valueLabel: `${formatCents(monthlyProg)} / ${formatCents(MONTHLY_GOAL_CENTS)}`,
-    },
-    {
-      progress: weeklyProg / weeklyTarget,
-      color: RING_COLORS[1],
-      trackColor: RING_TRACKS[1],
-      label: "Weekly",
-      valueLabel: `${formatCents(weeklyProg)} / ${formatCents(weeklyTarget)}`,
-    },
-    {
-      progress: dailyProg / DAILY_GOAL_CENTS,
-      color: RING_COLORS[2],
-      trackColor: RING_TRACKS[2],
-      label: "Daily",
-      valueLabel: `${formatCents(dailyProg)} / ${formatCents(DAILY_GOAL_CENTS)}`,
-    },
-  ];
+  const rings = useMemo(
+    () => [
+      {
+        progress: monthlyProg / MONTHLY_GOAL_CENTS,
+        color: RING_COLORS[0],
+        trackColor: RING_TRACKS[0],
+        label: "Monthly",
+        valueLabel: `${formatCents(monthlyProg)} / ${formatCents(MONTHLY_GOAL_CENTS)}`,
+      },
+      {
+        progress: weeklyProg / weeklyTarget,
+        color: RING_COLORS[1],
+        trackColor: RING_TRACKS[1],
+        label: "Weekly",
+        valueLabel: `${formatCents(weeklyProg)} / ${formatCents(weeklyTarget)}`,
+      },
+      {
+        progress: dailyProg / DAILY_GOAL_CENTS,
+        color: RING_COLORS[2],
+        trackColor: RING_TRACKS[2],
+        label: "Daily",
+        valueLabel: `${formatCents(dailyProg)} / ${formatCents(DAILY_GOAL_CENTS)}`,
+      },
+    ],
+    [monthlyProg, weeklyProg, dailyProg, weeklyTarget],
+  );
 
   const [dragLeft, setDragLeft] = useState(-(PANEL_COUNT - 1) * 300);
   const isLandscape = useIsLandscape();
-  const [suppressAnimation, setSuppressAnimation] = useState(false);
   const prevLandscapeRef = useRef(isLandscape);
+  const [suppressTick, setSuppressTick] = useState(0);
+  const suppressUntilRef = useRef(0);
 
-  useEffect(() => {
-    if (prevLandscapeRef.current !== isLandscape) {
-      prevLandscapeRef.current = isLandscape;
-      const t1 = setTimeout(() => setSuppressAnimation(true), 0);
-      const t2 = setTimeout(() => setSuppressAnimation(false), 600);
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    }
-  }, [isLandscape]);
+  // Derive suppressAnimation synchronously during render — no state lag.
+  // When isLandscape changes, mark a suppress window and schedule its end.
+  if (prevLandscapeRef.current !== isLandscape) {
+    prevLandscapeRef.current = isLandscape;
+    suppressUntilRef.current = Date.now() + 600;
+    // Schedule a re-render after the window expires to clear it
+    setTimeout(() => setSuppressTick((n) => n + 1), 620);
+  }
+  const suppressAnimation = Date.now() < suppressUntilRef.current;
 
   const snapToPage = (target: number) => {
     const w = containerW.current || containerRef.current?.offsetWidth || 300;
@@ -224,7 +226,6 @@ export default function HomeScreen({
                 aria-label="Fund yourself"
               >
                 <ActivityRings
-                  key={isLandscape ? "landscape" : "portrait"}
                   rings={rings}
                   size={isLandscape ? 210 : 260}
                   gap={isLandscape ? 10 : 14}

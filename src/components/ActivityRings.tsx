@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { motion } from "framer-motion";
 
 interface Ring {
@@ -43,7 +44,7 @@ const SPIKE_INNER = 7; // px from centre of head
 const SPIKE_OUTER = 14; // px from centre of head
 const LAP_RING_GAP = 4; // px between active ring centre and each completion ring centre
 
-export default function ActivityRings({
+function ActivityRings({
   rings,
   size = 260,
   gap = 14,
@@ -111,8 +112,8 @@ export default function ActivityRings({
             />
 
             {/* ── Completion rings — one per lap, stacked outward (max 3) ── */}
-            {laps > 0 &&
-              Array.from({ length: Math.min(laps, 3) }, (_, lap) => {
+            <g key="lap-rings">
+              {Array.from({ length: Math.min(laps, 3) }, (_, lap) => {
                 const lapR = r + LAP_RING_GAP * (lap + 1);
                 const lapCircumference = TAU * lapR;
                 return (
@@ -126,9 +127,9 @@ export default function ActivityRings({
                     strokeWidth={TRAIL_W}
                     strokeLinecap="butt"
                     strokeDasharray={lapCircumference}
-                    strokeDashoffset={lapCircumference}
                     transform={`rotate(-90 ${cx} ${cy})`}
                     filter={`url(#glow-${i})`}
+                    initial={{ strokeDashoffset: lapCircumference }}
                     animate={{ strokeDashoffset: 0 }}
                     transition={
                       disableAnimation
@@ -142,6 +143,7 @@ export default function ActivityRings({
                   />
                 );
               })}
+            </g>
 
             {/* ── Animated arc trail ── */}
             <motion.circle
@@ -153,8 +155,8 @@ export default function ActivityRings({
               strokeWidth={TRAIL_W}
               strokeLinecap="butt"
               strokeDasharray={circumference}
-              strokeDashoffset={circumference}
               transform={`rotate(-90 ${cx} ${cy})`}
+              initial={{ strokeDashoffset: circumference }}
               animate={{ strokeDashoffset: circumference * (1 - arcFraction) }}
               transition={
                 disableAnimation
@@ -267,3 +269,5 @@ export default function ActivityRings({
     </svg>
   );
 }
+
+export default memo(ActivityRings);
