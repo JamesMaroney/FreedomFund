@@ -1,5 +1,6 @@
 import { useReducer, useCallback, useEffect, useState, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRegisterSW } from "virtual:pwa-register/react";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { useCelebration } from "./hooks/useCelebration";
 import { calculateNewStreak, getTodayString } from "./hooks/useStreak";
@@ -30,6 +31,7 @@ import AmountSelector from "./components/AmountSelector";
 import CelebrationOverlay from "./components/CelebrationOverlay";
 import TransferButton from "./components/TransferButton";
 import MilestoneToast from "./components/MilestoneToast";
+import UpdateToast from "./components/UpdateToast";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 
@@ -103,6 +105,18 @@ export default function App() {
     "coins",
   );
   const { trigger: triggerCelebration } = useCelebration(audioClip);
+
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW();
+
+  const handleUpdate = useCallback(() => updateServiceWorker(true), [updateServiceWorker]);
+  const handleDismissUpdate = useCallback(() => setNeedRefresh(false), [setNeedRefresh]);
+  const handleCheckForUpdates = useCallback(async () => {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg) await reg.update();
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -389,7 +403,11 @@ export default function App() {
           a.click();
         }}
         onReset={handleReset}
+        needRefresh={needRefresh}
+        onUpdate={handleUpdate}
+        onCheckForUpdates={handleCheckForUpdates}
       />
+      <UpdateToast needRefresh={needRefresh} onUpdate={handleUpdate} onDismiss={handleDismissUpdate} />
     </div>
   );
 }

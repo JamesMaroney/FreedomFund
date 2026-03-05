@@ -950,6 +950,55 @@
   letter-spacing: 0.01em;
 }
 
+/* ─── Update Toast ───────────────────────────────────────────────── */
+
+.update-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 40px;
+  padding: 10px 10px 10px 18px;
+  z-index: 200;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  white-space: nowrap;
+}
+
+.update-toast-text {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-right: 4px;
+}
+
+.update-toast-btn {
+  padding: 7px 14px;
+  border-radius: 32px;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.update-toast-btn:active {
+  opacity: 0.8;
+}
+.update-toast-btn--dismiss {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+.update-toast-btn--update {
+  background: var(--accent-gold);
+  color: #0a0a0f;
+}
+
 /* ─── Hamburger Button ───────────────────────────────────────────── */
 
 .hamburger-btn {
@@ -1912,14 +1961,47 @@
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.settings-version-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0 20px;
+}
+
 .settings-version {
   font-family: "DM Mono", monospace;
   font-size: 0.6rem;
   color: var(--text-secondary, rgba(255, 255, 255, 0.35));
   text-align: center;
-  padding: 8px 0 20px;
   letter-spacing: 0.12em;
   opacity: 0.5;
+}
+
+.settings-update-btn {
+  background: none;
+  border: none;
+  font-family: "DM Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.35));
+  opacity: 0.55;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: opacity 0.15s;
+}
+.settings-update-btn:hover {
+  opacity: 0.9;
+}
+.settings-update-btn:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+.settings-update-btn--ready {
+  color: var(--accent-gold);
+  opacity: 1;
+  font-weight: 600;
 }
 
 .settings-danger-section .settings-section-label {

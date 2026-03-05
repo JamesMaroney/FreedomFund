@@ -31,6 +31,9 @@ interface Props {
   unsentCents: number;
   onSendToAlly: () => void;
   onReset: () => void;
+  needRefresh: boolean;
+  onUpdate: () => void;
+  onCheckForUpdates: () => Promise<void>;
 }
 
 const AUDIO_OPTIONS: {
@@ -584,8 +587,22 @@ export default function SettingsPanel({
   unsentCents,
   onSendToAlly,
   onReset,
+  needRefresh,
+  onUpdate,
+  onCheckForUpdates,
 }: Props) {
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [justChecked, setJustChecked] = useState(false);
+
+  const handleCheckForUpdates = async () => {
+    setChecking(true);
+    setJustChecked(false);
+    await onCheckForUpdates();
+    setChecking(false);
+    setJustChecked(true);
+    setTimeout(() => setJustChecked(false), 3000);
+  };
 
   const handlePreview = (clip: AudioClip) => {
     const fn = PREVIEW_FN[clip];
@@ -761,7 +778,22 @@ export default function SettingsPanel({
                 )}
               </div>
 
-              <div className="settings-version">{__GIT_HASH__}</div>
+              <div className="settings-version-footer">
+                <span className="settings-version">v{__BUILD_NUMBER__} · {__GIT_HASH__}</span>
+                {needRefresh ? (
+                  <button className="settings-update-btn settings-update-btn--ready" onClick={onUpdate}>
+                    ↑ Update &amp; reload
+                  </button>
+                ) : (
+                  <button
+                    className="settings-update-btn"
+                    onClick={handleCheckForUpdates}
+                    disabled={checking}
+                  >
+                    {checking ? 'Checking…' : justChecked ? '✓ Up to date' : 'Check for updates'}
+                  </button>
+                )}
+              </div>
             </div>
           </motion.div>
         </>

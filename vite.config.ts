@@ -5,19 +5,21 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 import { execSync } from 'child_process'
 
 const isProd = process.env.NODE_ENV === 'production'
-const gitHash = execSync('git rev-parse HEAD').toString().trim().slice(0, 8)
+const gitHash = execSync('git rev-parse HEAD').toString().trim().slice(0, 7)
+const buildNumber = execSync('git rev-list --count HEAD').toString().trim()
 
 // https://vite.dev/config/
 export default defineConfig({
   base: isProd ? '/FreedomFund/' : '/',
   define: {
     __GIT_HASH__: JSON.stringify(gitHash),
+    __BUILD_NUMBER__: JSON.stringify(buildNumber),
   },
   plugins: [
     !isProd && basicSsl(),
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      registerType: 'prompt',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png'],
       manifest: {
         name: 'Freedom Fund',
