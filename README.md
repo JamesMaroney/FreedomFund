@@ -1,5 +1,11 @@
 # 💸 Freedom Fund
 
+[![CI](https://github.com/JamesMaroney/FreedomFund/actions/workflows/ci.yml/badge.svg)](https://github.com/JamesMaroney/FreedomFund/actions/workflows/ci.yml)
+[![Statements](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/statements.json)](https://jamesmaroney.github.io/FreedomFund/badges/statements.json)
+[![Branches](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/branches.json)](https://jamesmaroney.github.io/FreedomFund/badges/branches.json)
+[![Functions](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/functions.json)](https://jamesmaroney.github.io/FreedomFund/badges/functions.json)
+[![Lines](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/lines.json)](https://jamesmaroney.github.io/FreedomFund/badges/lines.json)
+
 **Pay yourself every time you skip an impulse purchase — and watch your freedom fund grow.**
 
 [**Open the app →**](https://jamesmaroney.github.io/FreedomFund/)

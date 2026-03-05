@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage -- --reporter=verbose --coverage.reporter=json-summary --coverage.reporter=text
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 30
+
+      # Generate shields.io endpoint JSONs from coverage-summary.json.
+      # One JSON per metric — README badges point at the raw gh-pages URLs.
+      # Only runs on pushes to main (not on PRs from forks).
+      - name: Generate badge JSONs
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          node - <<'EOF'
+          const fs = require('fs');
+          const s = JSON.parse(fs.readFileSync('coverage/coverage-summary.json', 'utf8')).total;
+          const color = p => p >= 95 ? 'brightgreen' : p >= 80 ? 'green' : p >= 60 ? 'yellow' : 'red';
+          fs.mkdirSync('coverage/badges', { recursive: true });
+          for (const [key, label] of [
+            ['statements', 'statements'],
+            ['branches',   'branches'],
+            ['functions',  'functions'],
+            ['lines',      'lines'],
+          ]) {
+            const pct = s[key].pct;
+            fs.writeFileSync(`coverage/badges/${key}.json`, JSON.stringify({
+              schemaVersion: 1, label: `coverage: ${label}`, message: `${pct}%`, color: color(pct),
+            }));
+          }
+          console.log('Badge JSONs written.');
+          EOF
+
+      - name: Deploy badges to gh-pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: coverage/badges
+          destination_dir: badges
+          keep_files: true
+          commit_message: 'chore: update coverage badges [skip ci]'
