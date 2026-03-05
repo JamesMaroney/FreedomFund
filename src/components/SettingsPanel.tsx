@@ -694,7 +694,7 @@ export default function SettingsPanel({
                 {unsentCents > 0 && (
                   <button
                     className="settings-bank-send-btn"
-                    onClick={() => { onSendToBank(); onClose(); }}
+                    onClick={() => { onClose(); onSendToBank(); }}
                   >
                     {bankSettings.enabled
                       ? `Send ${formatCents(unsentCents, currencyLocale)} to Freedom Fund →`

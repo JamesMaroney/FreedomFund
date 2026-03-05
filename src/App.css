@@ -2163,3 +2163,128 @@
 .settings-reset-cancel-btn:active {
   background: rgba(255, 255, 255, 0.09);
 }
+
+/* ─── Transfer Modal ─────────────────────────────────────────────── */
+
+.transfer-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 300;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.transfer-modal {
+  position: fixed;
+  left: 20px;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 301;
+  background: var(--bg-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  padding: 28px 24px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.65);
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.transfer-modal-icon {
+  font-size: 2.2rem;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.transfer-modal-title {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  text-align: center;
+}
+
+.transfer-modal-body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+  text-align: center;
+}
+
+.transfer-modal-body strong {
+  color: var(--accent-gold);
+  font-weight: 700;
+}
+
+.transfer-modal-skip-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.transfer-modal-checkbox {
+  width: 17px;
+  height: 17px;
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.transfer-modal-skip-label {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.83rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  user-select: none;
+}
+
+.transfer-modal-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.transfer-modal-btn {
+  flex: 1;
+  padding: 11px 14px;
+  border-radius: 13px;
+  border: none;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.transfer-modal-btn:active {
+  opacity: 0.75;
+}
+
+.transfer-modal-btn--cancel {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+}
+
+.transfer-modal-btn--ok {
+  background: var(--accent-gold);
+  color: #0a0a0f;
+}
+

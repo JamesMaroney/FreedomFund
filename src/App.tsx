@@ -35,6 +35,7 @@ import CelebrationOverlay from "./components/CelebrationOverlay";
 import TransferButton from "./components/TransferButton";
 import MilestoneToast from "./components/MilestoneToast";
 import UpdateToast from "./components/UpdateToast";
+import TransferModal from "./components/TransferModal";
 import SettingsPanel from "./components/SettingsPanel";
 import "./App.css";
 
@@ -102,6 +103,8 @@ export default function App() {
     useState<BeforeInstallPromptEvent | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [transferPending, setTransferPending] = useState(false);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [skipTransferModal, setSkipTransferModal] = useLocalStorage<boolean>("freedom-fund-skip-transfer-modal", false);
   const awaitingTransferReturn = useRef(false);
   const [audioClip, setAudioClip] = useLocalStorage<AudioClip>(
     "freedom-fund-audio-clip",
@@ -255,19 +258,33 @@ export default function App() {
     });
   }, [setFundState]);
 
-  const handleSendToBank = useCallback(() => {
+  const doOpenBank = useCallback(() => {
     const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
     const amount = fundState.deposits
       .filter((d) => !d.transferred)
       .reduce((sum, d) => sum + d.amount, 0);
+    const bank = BANK_OPTIONS.find((b) => b.id === bs.bankId) ?? BANK_OPTIONS[0];
+    navigator.clipboard.writeText(`${(amount / 100).toFixed(2)}`).catch(() => {});
+    awaitingTransferReturn.current = true;
+    const a = document.createElement("a");
+    a.href = bank.transferUrl;
+    a.rel = "noopener noreferrer";
+    a.click();
+  }, [fundState.bankSettings, fundState.deposits]);
+
+  const handleSendToBank = useCallback(() => {
+    const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
     if (bs.enabled) {
-      const bank = BANK_OPTIONS.find((b) => b.id === bs.bankId) ?? BANK_OPTIONS[0];
+      // Copy amount to clipboard first (so it's ready even before modal OK)
+      const amount = fundState.deposits
+        .filter((d) => !d.transferred)
+        .reduce((sum, d) => sum + d.amount, 0);
       navigator.clipboard.writeText(`${(amount / 100).toFixed(2)}`).catch(() => {});
-      awaitingTransferReturn.current = true;
-      const a = document.createElement("a");
-      a.href = bank.transferUrl;
-      a.rel = "noopener noreferrer";
-      a.click();
+      if (skipTransferModal) {
+        doOpenBank();
+      } else {
+        setTransferModalOpen(true);
+      }
     } else {
       // No bank connected — just mark all deposits as transferred
       setFundState((prev) => ({
@@ -275,7 +292,17 @@ export default function App() {
         deposits: prev.deposits.map((d) => ({ ...d, transferred: true })),
       }));
     }
-  }, [fundState.bankSettings, fundState.deposits, setFundState]);
+  }, [fundState.bankSettings, fundState.deposits, skipTransferModal, doOpenBank, setFundState]);
+
+  const handleTransferConfirm = useCallback((skipNext: boolean) => {
+    setTransferModalOpen(false);
+    if (skipNext) setSkipTransferModal(true);
+    doOpenBank();
+  }, [doOpenBank, setSkipTransferModal]);
+
+  const handleTransferCancel = useCallback(() => {
+    setTransferModalOpen(false);
+  }, []);
 
   return (
     <div className="app-root">
@@ -431,6 +458,16 @@ export default function App() {
         onCheckForUpdates={handleCheckForUpdates}
       />
       <UpdateToast needRefresh={toastVisible} onUpdate={handleUpdate} onDismiss={handleDismissUpdate} />
+      {(fundState.bankSettings ?? DEFAULT_BANK_SETTINGS).enabled && (
+        <TransferModal
+          isOpen={transferModalOpen}
+          amountCents={fundState.deposits.filter((d) => !d.transferred).reduce((sum, d) => sum + d.amount, 0)}
+          bankLabel={(() => { const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS; return BANK_OPTIONS.find((b) => b.id === bs.bankId)?.label ?? 'your bank'; })()}
+          currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+          onConfirm={handleTransferConfirm}
+          onCancel={handleTransferCancel}
+        />
+      )}
     </div>
   );
 }
