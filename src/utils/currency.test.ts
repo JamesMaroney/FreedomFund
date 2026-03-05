@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { formatCents, parseDollarsToCents } from './currency';
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { formatCents, parseDollarsToCents, detectSystemLocale } from './currency';
 
 const USD = { locale: 'en-US', currency: 'USD' };
 const EUR_DE = { locale: 'de-DE', currency: 'EUR' };
@@ -64,6 +64,24 @@ describe('formatCents', () => {
     // Fallback returns $-prefixed string
     expect(result).toContain('10');
   });
+
+  it('uses the catch fallback when Intl.NumberFormat throws', () => {
+    const original = Intl.NumberFormat;
+    vi.stubGlobal('Intl', {
+      ...Intl,
+      NumberFormat: function () {
+        throw new RangeError('Invalid currency code');
+      },
+    });
+    const result = formatCents(1050, { locale: 'en-US', currency: 'USD' });
+    // catch block: '$' + dollars.toFixed(2).replace(/\.00$/, '')
+    expect(result).toBe('$10.50');
+    vi.stubGlobal('Intl', { ...Intl, NumberFormat: original });
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
 });
 
 // ─── parseDollarsToCents ─────────────────────────────────────────────────────
@@ -103,5 +121,60 @@ describe('parseDollarsToCents', () => {
 
   it('handles zero', () => {
     expect(parseDollarsToCents('0')).toBe(0);
+  });
+});
+
+// ─── detectSystemLocale ───────────────────────────────────────────────────────
+
+describe('detectSystemLocale', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('returns USD for en-US navigator language', () => {
+    vi.stubGlobal('navigator', { language: 'en-US' });
+    const result = detectSystemLocale();
+    expect(result.locale).toBe('en-US');
+    expect(result.currency).toBe('USD');
+  });
+
+  it('returns GBP for en-GB navigator language', () => {
+    vi.stubGlobal('navigator', { language: 'en-GB' });
+    const result = detectSystemLocale();
+    expect(result.locale).toBe('en-GB');
+    expect(result.currency).toBe('GBP');
+  });
+
+  it('returns EUR for de-DE navigator language', () => {
+    vi.stubGlobal('navigator', { language: 'de-DE' });
+    const result = detectSystemLocale();
+    expect(result.locale).toBe('de-DE');
+    expect(result.currency).toBe('EUR');
+  });
+
+  it('returns JPY for ja-JP navigator language', () => {
+    vi.stubGlobal('navigator', { language: 'ja-JP' });
+    const result = detectSystemLocale();
+    expect(result.currency).toBe('JPY');
+  });
+
+  it('falls back to USD for an unknown region', () => {
+    vi.stubGlobal('navigator', { language: 'en-XX' });
+    const result = detectSystemLocale();
+    expect(result.currency).toBe('USD');
+  });
+
+  it('falls back to USD when navigator language has no region tag', () => {
+    // e.g. "fr" with no "-XX" region — region will be undefined → ?? 'USD'
+    vi.stubGlobal('navigator', { language: 'fr' });
+    const result = detectSystemLocale();
+    expect(result.locale).toBe('fr');
+    expect(result.currency).toBe('USD');
+  });
+
+  it('falls back to en-US locale when navigator.language is falsy', () => {
+    vi.stubGlobal('navigator', { language: '' });
+    const result = detectSystemLocale();
+    expect(result.locale).toBe('en-US');
   });
 });

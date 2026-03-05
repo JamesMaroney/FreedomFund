@@ -1,5 +1,14 @@
-import { describe, it, expect } from 'vitest';
-import { getTodayString, getYesterdayString, calculateNewStreak } from '../hooks/useStreak';
+import { describe, it, expect, vi } from 'vitest';
+
+// Stub useMemo so the hook can be called outside a React component tree.
+// In a node test environment there is no renderer, so we make useMemo
+// simply invoke its factory and return the result.
+vi.mock('react', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react')>();
+  return { ...actual, useMemo: (fn: () => unknown) => fn() };
+});
+
+import { getTodayString, getYesterdayString, calculateNewStreak, useStreak } from '../hooks/useStreak';
 
 // ─── getTodayString ───────────────────────────────────────────────────────────
 
@@ -67,5 +76,40 @@ describe('calculateNewStreak', () => {
 
   it('returns 1 for the very first deposit (empty lastDepositDate)', () => {
     expect(calculateNewStreak(0, '')).toBe(1);
+  });
+});
+
+// ─── useStreak ────────────────────────────────────────────────────────────────
+
+describe('useStreak', () => {
+  const TODAY = getTodayString();
+  const YESTERDAY = getYesterdayString();
+
+  it('reports depositedToday=true and displayStreak=currentStreak when last deposit is today', () => {
+    const result = useStreak({ currentStreak: 7, lastDepositDate: TODAY });
+    expect(result.depositedToday).toBe(true);
+    expect(result.isAlive).toBe(true);
+    expect(result.displayStreak).toBe(7);
+  });
+
+  it('reports depositedToday=false but isAlive=true when last deposit was yesterday', () => {
+    const result = useStreak({ currentStreak: 4, lastDepositDate: YESTERDAY });
+    expect(result.depositedToday).toBe(false);
+    expect(result.isAlive).toBe(true);
+    expect(result.displayStreak).toBe(4);
+  });
+
+  it('reports isAlive=false and displayStreak=0 when streak is broken', () => {
+    const result = useStreak({ currentStreak: 10, lastDepositDate: '2020-01-01' });
+    expect(result.isAlive).toBe(false);
+    expect(result.depositedToday).toBe(false);
+    expect(result.displayStreak).toBe(0);
+  });
+
+  it('handles an empty lastDepositDate (first-time user)', () => {
+    const result = useStreak({ currentStreak: 0, lastDepositDate: '' });
+    expect(result.isAlive).toBe(false);
+    expect(result.depositedToday).toBe(false);
+    expect(result.displayStreak).toBe(0);
   });
 });

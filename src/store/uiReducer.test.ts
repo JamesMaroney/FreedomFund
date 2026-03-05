@@ -106,6 +106,17 @@ describe('uiReducer', () => {
     });
   });
 
+  // default branch — unknown action returns state unchanged
+  describe('default (unknown action)', () => {
+    it('returns the existing state unchanged for an unrecognised action type', () => {
+      const state = idle;
+      // Cast to any to bypass TypeScript exhaustiveness check
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const next = uiReducer(state, { type: 'UNKNOWN_ACTION' } as any);
+      expect(next).toBe(state);
+    });
+  });
+
   // Full state machine flow
   describe('full state machine flow', () => {
     it('follows the complete happy path: IDLE → selecting → celebrating → transfer → idle', () => {
