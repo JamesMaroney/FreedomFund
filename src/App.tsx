@@ -1,13 +1,11 @@
 import { useReducer, useCallback, useEffect, useState, useRef } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { useRegisterSW } from "virtual:pwa-register/react";
 import useLocalStorage from "./hooks/useLocalStorage";
 import { useCelebration } from "./hooks/useCelebration";
 import { calculateNewStreak, getTodayString } from "./hooks/useStreak";
 import type {
   FreedomFundState,
-  AppUIState,
-  AppAction,
   Deposit,
   AudioClip,
   TipPreset,
@@ -18,7 +16,6 @@ import type {
 } from "./types";
 import {
   MILESTONE_AMOUNTS,
-  DEFAULT_WEEKLY_GOAL_CENTS,
   DEFAULT_TIP_PRESETS,
   DEFAULT_GOALS,
   DEFAULT_PROJECTION_SETTINGS,
@@ -26,13 +23,15 @@ import {
   DEFAULT_BANK_SETTINGS,
   BANK_OPTIONS,
 } from "./constants/presets";
-import { formatCents } from "./utils/currency";
 import { generateId } from "./utils/id";
 import { primeAudio } from "./utils/audio";
+import { getUnsentCents, findNewMilestone, markAllTransferred } from "./utils/deposits";
+import { uiReducer, INITIAL_UI } from "./store/uiReducer";
 import HomeScreen from "./components/HomeScreen";
 import AmountSelector from "./components/AmountSelector";
 import CelebrationOverlay from "./components/CelebrationOverlay";
 import TransferButton from "./components/TransferButton";
+import TransferConfirmCard from "./components/TransferConfirmCard";
 import MilestoneToast from "./components/MilestoneToast";
 import UpdateToast from "./components/UpdateToast";
 import TransferModal from "./components/TransferModal";
@@ -44,7 +43,7 @@ const DEFAULT_FUND_STATE: FreedomFundState = {
   currentStreak: 0,
   lastDepositDate: "",
   deposits: [],
-  weeklyGoal: DEFAULT_WEEKLY_GOAL_CENTS,
+  weeklyGoal: 10000,
   milestones: [],
   challengeStartDate: getTodayString(),
   goals: DEFAULT_GOALS,
@@ -52,39 +51,6 @@ const DEFAULT_FUND_STATE: FreedomFundState = {
   projectionSettings: DEFAULT_PROJECTION_SETTINGS,
   currencyLocale: DEFAULT_CURRENCY_LOCALE,
   bankSettings: DEFAULT_BANK_SETTINGS,
-};
-
-function uiReducer(state: AppUIState, action: AppAction): AppUIState {
-  switch (action.type) {
-    case "OPEN_SELECTOR":
-      return { ...state, screen: "SELECTING_AMOUNT" };
-    case "CONFIRM_DEPOSIT":
-      return {
-        ...state,
-        screen: "CELEBRATING",
-        pendingAmount: action.amount,
-        pendingLabel: action.label,
-      };
-    case "CELEBRATION_COMPLETE":
-      return { ...state, screen: "TRANSFER_PROMPT" };
-    case "MARK_TRANSFERRED":
-    case "DISMISS":
-      return {
-        screen: "IDLE",
-        pendingAmount: 0,
-        pendingLabel: "",
-        lastDepositId: null,
-      };
-    default:
-      return state;
-  }
-}
-
-const INITIAL_UI: AppUIState = {
-  screen: "IDLE",
-  pendingAmount: 0,
-  pendingLabel: "",
-  lastDepositId: null,
 };
 
 interface BeforeInstallPromptEvent extends Event {
@@ -97,6 +63,14 @@ export default function App() {
     "freedom-fund-state",
     DEFAULT_FUND_STATE,
   );
+
+  // Normalise optional fields once so the rest of the component never needs `?? DEFAULT_X`
+  const projectionSettings = fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS;
+  const currencyLocale = fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE;
+  const bankSettings = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
+  const tipPresets = fundState.tipPresets ?? DEFAULT_TIP_PRESETS;
+  const goals = fundState.goals ?? DEFAULT_GOALS;
+  const unsentCents = getUnsentCents(fundState.deposits);
   const [ui, dispatch] = useReducer(uiReducer, INITIAL_UI);
   const [milestoneHit, setMilestoneHit] = useState<number | null>(null);
   const [installPrompt, setInstallPrompt] =
@@ -203,9 +177,7 @@ export default function App() {
         transferred: false,
       };
 
-      const newMilestone = MILESTONE_AMOUNTS.find(
-        (m) => !fundState.milestones.includes(m * 100) && newTotal >= m * 100,
-      );
+      const newMilestone = findNewMilestone(MILESTONE_AMOUNTS, fundState.milestones, newTotal);
 
       setFundState((prev) => ({
         ...prev,
@@ -246,57 +218,40 @@ export default function App() {
   }, [installPrompt]);
 
   const handleReset = useCallback(() => {
-    setFundState((prev) => {
-      const unsentAmount = prev.deposits
-        .filter((d) => !d.transferred)
-        .reduce((sum, d) => sum + d.amount, 0);
-      return {
-        ...prev,
-        totalSaved: prev.totalSaved - unsentAmount,
-        deposits: prev.deposits.filter((d) => d.transferred),
-      };
-    });
+    setFundState((prev) => ({
+      ...prev,
+      totalSaved: prev.totalSaved - getUnsentCents(prev.deposits),
+      deposits: prev.deposits.filter((d) => d.transferred),
+    }));
   }, [setFundState]);
 
   const doOpenBank = useCallback(() => {
-    const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
-    const amount = fundState.deposits
-      .filter((d) => !d.transferred)
-      .reduce((sum, d) => sum + d.amount, 0);
-    const bank = BANK_OPTIONS.find((b) => b.id === bs.bankId) ?? BANK_OPTIONS[0];
-    navigator.clipboard.writeText(`${(amount / 100).toFixed(2)}`).catch(() => {});
+    const bank = BANK_OPTIONS.find((b) => b.id === bankSettings.bankId) ?? BANK_OPTIONS[0];
     awaitingTransferReturn.current = true;
     const a = document.createElement("a");
     a.href = bank.transferUrl;
     a.rel = "noopener noreferrer";
     a.click();
-  }, [fundState.bankSettings, fundState.deposits]);
+  }, [bankSettings.bankId]);
 
   const handleSendToBank = useCallback(() => {
-    const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
-    if (bs.enabled) {
-      // Copy amount to clipboard first (so it's ready even before modal OK)
-      const amount = fundState.deposits
-        .filter((d) => !d.transferred)
-        .reduce((sum, d) => sum + d.amount, 0);
-      navigator.clipboard.writeText(`${(amount / 100).toFixed(2)}`).catch(() => {});
+    if (bankSettings.enabled) {
+      // Copy amount to clipboard immediately so it's ready regardless of modal path
+      navigator.clipboard.writeText(`${(unsentCents / 100).toFixed(2)}`).catch(() => {});
       if (skipTransferModal) {
         doOpenBank();
       } else {
         setTransferModalOpen(true);
       }
     } else {
-      // No bank connected — just mark all deposits as transferred
-      setFundState((prev) => ({
-        ...prev,
-        deposits: prev.deposits.map((d) => ({ ...d, transferred: true })),
-      }));
+      // No bank connected — mark all deposits as transferred immediately
+      setFundState((prev) => ({ ...prev, deposits: markAllTransferred(prev.deposits) }));
     }
-  }, [fundState.bankSettings, fundState.deposits, skipTransferModal, doOpenBank, setFundState]);
+  }, [bankSettings.enabled, unsentCents, skipTransferModal, doOpenBank, setFundState]);
 
   const handleTransferConfirm = useCallback((skipNext: boolean) => {
-    setTransferModalOpen(false);
     if (skipNext) setSkipTransferModal(true);
+    setTransferModalOpen(false);
     doOpenBank();
   }, [doOpenBank, setSkipTransferModal]);
 
@@ -315,20 +270,18 @@ export default function App() {
             onOpenSettings={() => setSettingsOpen(true)}
             installPrompt={installPrompt !== null}
             onInstall={handleInstallPWA}
-            projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
-            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
-            bankSettings={fundState.bankSettings ?? DEFAULT_BANK_SETTINGS}
-            unsentCents={fundState.deposits
-              .filter((d) => !d.transferred)
-              .reduce((sum, d) => sum + d.amount, 0)}
+            projectionSettings={projectionSettings}
+            currencyLocale={currencyLocale}
+            bankSettings={bankSettings}
+            unsentCents={unsentCents}
             onSendToBank={handleSendToBank}
           />
         )}
         {ui.screen === "SELECTING_AMOUNT" && (
           <AmountSelector
             key="selector"
-            tipPresets={fundState.tipPresets ?? DEFAULT_TIP_PRESETS}
-            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+            tipPresets={tipPresets}
+            currencyLocale={currencyLocale}
             onSelect={handleSelectAmount}
             onBack={handleDismiss}
           />
@@ -339,7 +292,7 @@ export default function App() {
             amount={ui.pendingAmount}
             label={ui.pendingLabel}
             isMilestone={!!milestoneHit}
-            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+            currencyLocale={currencyLocale}
             onComplete={handleCelebrationComplete}
           />
         )}
@@ -348,8 +301,8 @@ export default function App() {
             key="transfer"
             amount={ui.pendingAmount}
             totalSavedCents={fundState.totalSaved}
-            projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
-            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+            projectionSettings={projectionSettings}
+            currencyLocale={currencyLocale}
             onSkip={handleDismiss}
           />
         )}
@@ -367,59 +320,16 @@ export default function App() {
 
       <AnimatePresence>
         {transferPending && (
-          <motion.div
+          <TransferConfirmCard
             key="transfer-confirm"
-            className="transfer-confirm-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <motion.div
-              className="transfer-confirm-card"
-              initial={{ scale: 0.92, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.92, opacity: 0 }}
-              transition={{ type: "spring", stiffness: 380, damping: 30 }}
-            >
-              <span className="transfer-confirm-icon">🏦</span>
-              <p className="transfer-confirm-question">
-                Did{" "}
-                <span className="transfer-confirm-amount">
-                  {(() => {
-                    const cents = fundState.deposits
-                      .filter((d) => !d.transferred)
-                      .reduce((sum, d) => sum + d.amount, 0);
-                    return formatCents(cents, fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE);
-                  })()}
-                </span>{" "}
-                go through?
-              </p>
-              <div className="transfer-confirm-actions">
-                <button
-                  className="transfer-confirm-btn transfer-confirm-btn--yes"
-                  onClick={() => {
-                    setFundState((prev) => ({
-                      ...prev,
-                      deposits: prev.deposits.map((d) => ({
-                        ...d,
-                        transferred: true,
-                      })),
-                    }));
-                    setTransferPending(false);
-                  }}
-                >
-                  Yes, lock it in 🔒
-                </button>
-                <button
-                  className="transfer-confirm-btn transfer-confirm-btn--no"
-                  onClick={() => setTransferPending(false)}
-                >
-                  Not yet
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
+            unsentCents={unsentCents}
+            currencyLocale={currencyLocale}
+            onConfirm={() => {
+              setFundState((prev) => ({ ...prev, deposits: markAllTransferred(prev.deposits) }));
+              setTransferPending(false);
+            }}
+            onDismiss={() => setTransferPending(false)}
+          />
         )}
       </AnimatePresence>
 
@@ -428,42 +338,30 @@ export default function App() {
         onClose={() => setSettingsOpen(false)}
         audioClip={audioClip}
         onAudioClipChange={setAudioClip}
-        goals={fundState.goals ?? DEFAULT_GOALS}
-        onGoalsChange={(g: Goals) =>
-          setFundState((prev) => ({ ...prev, goals: g }))
-        }
-        tipPresets={fundState.tipPresets ?? DEFAULT_TIP_PRESETS}
-        onTipPresetsChange={(p: TipPreset[]) =>
-          setFundState((prev) => ({ ...prev, tipPresets: p }))
-        }
-        projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
-        onProjectionSettingsChange={(ps: ProjectionSettings) =>
-          setFundState((prev) => ({ ...prev, projectionSettings: ps }))
-        }
-        currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
-        onCurrencyLocaleChange={(cl: CurrencyLocale) =>
-          setFundState((prev) => ({ ...prev, currencyLocale: cl }))
-        }
-        unsentCents={fundState.deposits
-          .filter((d) => !d.transferred)
-          .reduce((sum, d) => sum + d.amount, 0)}
+        goals={goals}
+        onGoalsChange={(g: Goals) => setFundState((prev) => ({ ...prev, goals: g }))}
+        tipPresets={tipPresets}
+        onTipPresetsChange={(p: TipPreset[]) => setFundState((prev) => ({ ...prev, tipPresets: p }))}
+        projectionSettings={projectionSettings}
+        onProjectionSettingsChange={(ps: ProjectionSettings) => setFundState((prev) => ({ ...prev, projectionSettings: ps }))}
+        currencyLocale={currencyLocale}
+        onCurrencyLocaleChange={(cl: CurrencyLocale) => setFundState((prev) => ({ ...prev, currencyLocale: cl }))}
+        unsentCents={unsentCents}
         onSendToBank={handleSendToBank}
-        bankSettings={fundState.bankSettings ?? DEFAULT_BANK_SETTINGS}
-        onBankSettingsChange={(bs: BankSettings) =>
-          setFundState((prev) => ({ ...prev, bankSettings: bs }))
-        }
+        bankSettings={bankSettings}
+        onBankSettingsChange={(bs: BankSettings) => setFundState((prev) => ({ ...prev, bankSettings: bs }))}
         onReset={handleReset}
         needRefresh={updateReady}
         onUpdate={handleUpdate}
         onCheckForUpdates={handleCheckForUpdates}
       />
       <UpdateToast needRefresh={toastVisible} onUpdate={handleUpdate} onDismiss={handleDismissUpdate} />
-      {(fundState.bankSettings ?? DEFAULT_BANK_SETTINGS).enabled && (
+      {bankSettings.enabled && (
         <TransferModal
           isOpen={transferModalOpen}
-          amountCents={fundState.deposits.filter((d) => !d.transferred).reduce((sum, d) => sum + d.amount, 0)}
-          bankLabel={(() => { const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS; return BANK_OPTIONS.find((b) => b.id === bs.bankId)?.label ?? 'your bank'; })()}
-          currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+          amountCents={unsentCents}
+          bankLabel={BANK_OPTIONS.find((b) => b.id === bankSettings.bankId)?.label ?? 'your bank'}
+          currencyLocale={currencyLocale}
           onConfirm={handleTransferConfirm}
           onCancel={handleTransferCancel}
         />

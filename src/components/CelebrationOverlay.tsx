@@ -20,7 +20,7 @@ export default function CelebrationOverlay({ amount, label, isMilestone, currenc
   const particles = isMilestone ? MILESTONE_PARTICLES : PARTICLES
   // Pin onComplete in a ref so the timer never resets if parent re-renders
   const onCompleteRef = useRef(onComplete)
-  onCompleteRef.current = onComplete
+  useEffect(() => { onCompleteRef.current = onComplete }, [onComplete])
 
   useEffect(() => {
     const timer = setTimeout(() => onCompleteRef.current(), 1600)

@@ -1,7 +1,7 @@
 export type AudioClip = 'coins' | 'tada' | 'spring' | 'random' | 'off';
 
+export type { CurrencyLocale } from './utils/currency';
 import type { CurrencyLocale } from './utils/currency';
-export type { CurrencyLocale };
 
 export interface TipPreset {
   id: string;       // stable uuid
@@ -67,5 +67,4 @@ export interface AppUIState {
   screen: AppScreen;
   pendingAmount: number; // cents
   pendingLabel: string;
-  lastDepositId: string | null;
 }

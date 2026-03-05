@@ -3,11 +3,12 @@ import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState, CurrencyLocale, BankSettings } from "../types";
 import type { ProjectionSettings } from "../types";
 import { formatCents } from "../utils/currency";
+import { getDailyProgress, getWeeklyProgress, getMonthlyProgress, getWeeklyTarget } from "../utils/deposits";
 import { useStreak } from "../hooks/useStreak";
 import { useIsLandscape } from "../hooks/useOrientation";
 import ActivityRings from "./ActivityRings";
 import DepositHistory from "./DepositHistory";
-import { WEEKLY_TARGETS } from "../constants/presets";
+import { DEFAULT_GOALS } from "../constants/presets";
 import { calcProjections } from "../utils/projection";
 
 interface Props {
@@ -23,52 +24,10 @@ interface Props {
   onSendToBank: () => void;
 }
 
-// ─── Goal helpers ────────────────────────────────────────────────────────────
-
-function getDailyProgress(deposits: FreedomFundState["deposits"]): number {
-  const now = new Date();
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
-  return deposits
-    .filter((d) => {
-      const t = new Date(d.timestamp);
-      const ds = `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, "0")}-${String(t.getDate()).padStart(2, "0")}`;
-      return ds === todayStr;
-    })
-    .reduce((s, d) => s + d.amount, 0);
-}
-
-function getWeeklyProgress(deposits: FreedomFundState["deposits"]): number {
-  const now = new Date();
-  const startOfWeek = new Date(now);
-  startOfWeek.setDate(now.getDate() - now.getDay());
-  startOfWeek.setHours(0, 0, 0, 0);
-  return deposits
-    .filter((d) => new Date(d.timestamp) >= startOfWeek)
-    .reduce((s, d) => s + d.amount, 0);
-}
-
-function getMonthlyProgress(deposits: FreedomFundState["deposits"]): number {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  return deposits
-    .filter((d) => new Date(d.timestamp) >= startOfMonth)
-    .reduce((s, d) => s + d.amount, 0);
-}
-
-function getWeeklyTarget(challengeStartDate: string): number {
-  const start = new Date(challengeStartDate);
-  const now = new Date();
-  const weekNumber = Math.floor(
-    (now.getTime() - start.getTime()) / (7 * 24 * 60 * 60 * 1000),
-  );
-  const clampedWeek = Math.min(weekNumber, WEEKLY_TARGETS.length - 1);
-  return (WEEKLY_TARGETS[clampedWeek] ?? 100) * 100;
-}
-
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const DAILY_GOAL_CENTS = 1000; // $10
-const MONTHLY_GOAL_CENTS = 40000; // $400
+const DAILY_GOAL_CENTS = DEFAULT_GOALS.dailyCents;     // $10
+const MONTHLY_GOAL_CENTS = DEFAULT_GOALS.monthlyCents;  // $400
 
 const RING_COLORS = ["#ff375f", "#f5c842", "#00d68f"];
 const RING_TRACKS = [

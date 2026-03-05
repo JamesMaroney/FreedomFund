@@ -41,11 +41,6 @@ export function formatCents(cents: number, loc?: CurrencyLocale): string {
   }
 }
 
-/** Format cents compactly — whole dollars omit fractional part. */
-export function formatCentsCompact(cents: number, loc?: CurrencyLocale): string {
-  return formatCents(cents, loc);
-}
-
 /** Parse a dollar string like "12.50" or "12" into cents (locale-agnostic, numeric input) */
 export function parseDollarsToCents(value: string): number {
   // Strip any non-numeric except dot and minus, to handle locale-formatted pastes
