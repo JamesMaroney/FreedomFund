@@ -50,7 +50,6 @@ export default function AmountSelector({ tipPresets, currencyLocale, onSelect, o
             className="preset-chip"
             onClick={() => handlePreset(preset.amount, preset.description)}
             whileTap={{ scale: 0.92 }}
-            whileHover={{ scale: 1.04 }}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
             <span className="chip-emoji">{preset.emoji}</span>
@@ -64,7 +63,7 @@ export default function AmountSelector({ tipPresets, currencyLocale, onSelect, o
         <span className="custom-dollar">$</span>
         <input
           className="custom-input"
-          type="number"
+          type="text"
           inputMode="decimal"
           placeholder="0.00"
           value={customValue}

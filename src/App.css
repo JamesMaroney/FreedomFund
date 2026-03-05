@@ -629,7 +629,11 @@
   border: 1px solid var(--border-subtle);
   border-radius: 16px;
   cursor: pointer;
-  transition: border-color 0.15s;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.preset-chip:hover {
+  transform: scale(1.04);
 }
 
 .preset-chip:active {
