@@ -5,6 +5,7 @@
 [![Branches](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/branches.json)](https://jamesmaroney.github.io/FreedomFund/badges/branches.json)
 [![Functions](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/functions.json)](https://jamesmaroney.github.io/FreedomFund/badges/functions.json)
 [![Lines](https://img.shields.io/endpoint?url=https://jamesmaroney.github.io/FreedomFund/badges/lines.json)](https://jamesmaroney.github.io/FreedomFund/badges/lines.json)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 **Pay yourself every time you skip an impulse purchase — and watch your freedom fund grow.**
 
@@ -90,3 +91,11 @@ No account, no server, no bank access — your data never leaves your device. Se
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for technical setup, architecture notes, and how to run the project locally.
+
+---
+
+## License
+
+© 2026 James Maroney. Licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+Free to use, share, and adapt — **not for commercial use**. Modifications must be released under the same license. For commercial licensing inquiries, open an issue.
