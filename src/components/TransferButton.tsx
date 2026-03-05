@@ -9,21 +9,14 @@ interface Props {
   totalSavedCents: number;
   projectionSettings: ProjectionSettings;
   currencyLocale: CurrencyLocale;
-  onTransfer: () => void;
   onSkip: () => void;
 }
 
-const ALLY_FALLBACK = "https://ally.com";
 const AUTO_DISMISS_MS = 3000;
 
-function openAlly() {
-  // Open Ally in a new tab — never hijack the current tab
-  window.open(ALLY_FALLBACK, "_blank", "noopener,noreferrer");
-}
-
-export default function TransferButton({ amount, totalSavedCents, projectionSettings, currencyLocale, onTransfer, onSkip }: Props) {
+export default function TransferButton({ amount, totalSavedCents, projectionSettings, currencyLocale, onSkip }: Props) {
   const onSkipRef = useRef(onSkip);
-  onSkipRef.current = onSkip;
+  useEffect(() => { onSkipRef.current = onSkip; }, [onSkip]);
 
   const projections = calcProjections(totalSavedCents, projectionSettings.annualRatePct, projectionSettings.horizons);
 
@@ -31,11 +24,6 @@ export default function TransferButton({ amount, totalSavedCents, projectionSett
     const timer = setTimeout(() => onSkipRef.current(), AUTO_DISMISS_MS);
     return () => clearTimeout(timer);
   }, []);
-
-  const handleTransfer = () => {
-    onTransfer();
-    openAlly();
-  };
 
   return (
     <motion.div
@@ -52,7 +40,6 @@ export default function TransferButton({ amount, totalSavedCents, projectionSett
           <span className="transfer-amount">{formatCents(amount, currencyLocale)}</span> added
           to your Freedom Fund.
         </p>
-        <p className="transfer-cta-label">Ready to move the real money?</p>
 
         {totalSavedCents > 0 && (
           <motion.div
@@ -75,18 +62,8 @@ export default function TransferButton({ amount, totalSavedCents, projectionSett
           </motion.div>
         )}
 
-        <motion.button
-          className="transfer-btn"
-          onClick={handleTransfer}
-          whileTap={{ scale: 0.96 }}
-          whileHover={{ scale: 1.02 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-        >
-          Open Ally to Transfer →
-        </motion.button>
-
         <button className="skip-btn" onClick={onSkip}>
-          Skip for now
+          Done
         </button>
       </div>
     </motion.div>

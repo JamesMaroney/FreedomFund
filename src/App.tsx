@@ -14,6 +14,7 @@ import type {
   Goals,
   ProjectionSettings,
   CurrencyLocale,
+  BankSettings,
 } from "./types";
 import {
   MILESTONE_AMOUNTS,
@@ -22,6 +23,8 @@ import {
   DEFAULT_GOALS,
   DEFAULT_PROJECTION_SETTINGS,
   DEFAULT_CURRENCY_LOCALE,
+  DEFAULT_BANK_SETTINGS,
+  BANK_OPTIONS,
 } from "./constants/presets";
 import { formatCents } from "./utils/currency";
 import { generateId } from "./utils/id";
@@ -47,6 +50,7 @@ const DEFAULT_FUND_STATE: FreedomFundState = {
   tipPresets: DEFAULT_TIP_PRESETS,
   projectionSettings: DEFAULT_PROJECTION_SETTINGS,
   currencyLocale: DEFAULT_CURRENCY_LOCALE,
+  bankSettings: DEFAULT_BANK_SETTINGS,
 };
 
 function uiReducer(state: AppUIState, action: AppAction): AppUIState {
@@ -94,7 +98,6 @@ export default function App() {
   );
   const [ui, dispatch] = useReducer(uiReducer, INITIAL_UI);
   const [milestoneHit, setMilestoneHit] = useState<number | null>(null);
-  const [lastDepositId, setLastDepositId] = useState<string | null>(null);
   const [installPrompt, setInstallPrompt] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -212,7 +215,6 @@ export default function App() {
           : prev.milestones,
       }));
 
-      setLastDepositId(deposit.id);
       dispatch({ type: "CONFIRM_DEPOSIT", amount, label });
 
       if (newMilestone) {
@@ -228,18 +230,6 @@ export default function App() {
   const handleCelebrationComplete = useCallback(() => {
     dispatch({ type: "CELEBRATION_COMPLETE" });
   }, []);
-
-  const handleMarkTransferred = useCallback(() => {
-    if (lastDepositId) {
-      setFundState((prev) => ({
-        ...prev,
-        deposits: prev.deposits.map((d) =>
-          d.id === lastDepositId ? { ...d, transferred: true } : d,
-        ),
-      }));
-    }
-    dispatch({ type: "MARK_TRANSFERRED" });
-  }, [lastDepositId, setFundState]);
 
   const handleDismiss = useCallback(() => {
     dispatch({ type: "DISMISS" });
@@ -265,6 +255,28 @@ export default function App() {
     });
   }, [setFundState]);
 
+  const handleSendToBank = useCallback(() => {
+    const bs = fundState.bankSettings ?? DEFAULT_BANK_SETTINGS;
+    const amount = fundState.deposits
+      .filter((d) => !d.transferred)
+      .reduce((sum, d) => sum + d.amount, 0);
+    if (bs.enabled) {
+      const bank = BANK_OPTIONS.find((b) => b.id === bs.bankId) ?? BANK_OPTIONS[0];
+      navigator.clipboard.writeText(`${(amount / 100).toFixed(2)}`).catch(() => {});
+      awaitingTransferReturn.current = true;
+      const a = document.createElement("a");
+      a.href = bank.transferUrl;
+      a.rel = "noopener noreferrer";
+      a.click();
+    } else {
+      // No bank connected — just mark all deposits as transferred
+      setFundState((prev) => ({
+        ...prev,
+        deposits: prev.deposits.map((d) => ({ ...d, transferred: true })),
+      }));
+    }
+  }, [fundState.bankSettings, fundState.deposits, setFundState]);
+
   return (
     <div className="app-root">
       <AnimatePresence mode="wait">
@@ -278,22 +290,11 @@ export default function App() {
             onInstall={handleInstallPWA}
             projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
             currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+            bankSettings={fundState.bankSettings ?? DEFAULT_BANK_SETTINGS}
             unsentCents={fundState.deposits
               .filter((d) => !d.transferred)
               .reduce((sum, d) => sum + d.amount, 0)}
-            onSendToAlly={() => {
-              const amount = fundState.deposits
-                .filter((d) => !d.transferred)
-                .reduce((sum, d) => sum + d.amount, 0);
-              navigator.clipboard
-                .writeText(`${(amount / 100).toFixed(2)}`)
-                .catch(() => {});
-              awaitingTransferReturn.current = true;
-              const a = document.createElement("a");
-              a.href = "https://secure.ally.com/payments/transfers#";
-              a.rel = "noopener noreferrer";
-              a.click();
-            }}
+            onSendToBank={handleSendToBank}
           />
         )}
         {ui.screen === "SELECTING_AMOUNT" && (
@@ -322,7 +323,6 @@ export default function App() {
             totalSavedCents={fundState.totalSaved}
             projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
             currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
-            onTransfer={handleMarkTransferred}
             onSkip={handleDismiss}
           />
         )}
@@ -420,19 +420,11 @@ export default function App() {
         unsentCents={fundState.deposits
           .filter((d) => !d.transferred)
           .reduce((sum, d) => sum + d.amount, 0)}
-        onSendToAlly={() => {
-          const amount = fundState.deposits
-            .filter((d) => !d.transferred)
-            .reduce((sum, d) => sum + d.amount, 0);
-          navigator.clipboard
-            .writeText(`${(amount / 100).toFixed(2)}`)
-            .catch(() => {});
-          awaitingTransferReturn.current = true;
-          const a = document.createElement("a");
-          a.href = "https://secure.ally.com/payments/transfers#";
-          a.rel = "noopener noreferrer";
-          a.click();
-        }}
+        onSendToBank={handleSendToBank}
+        bankSettings={fundState.bankSettings ?? DEFAULT_BANK_SETTINGS}
+        onBankSettingsChange={(bs: BankSettings) =>
+          setFundState((prev) => ({ ...prev, bankSettings: bs }))
+        }
         onReset={handleReset}
         needRefresh={updateReady}
         onUpdate={handleUpdate}

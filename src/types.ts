@@ -30,6 +30,11 @@ export interface Deposit {
   transferred: boolean;
 }
 
+export interface BankSettings {
+  enabled: boolean;
+  bankId: 'ally'; // extend union as more banks are added
+}
+
 export interface FreedomFundState {
   totalSaved: number;
   currentStreak: number;
@@ -42,6 +47,7 @@ export interface FreedomFundState {
   tipPresets: TipPreset[];
   projectionSettings: ProjectionSettings;
   currencyLocale?: CurrencyLocale;
+  bankSettings?: BankSettings;
 }
 
 export type AppScreen =

@@ -5,7 +5,7 @@ import {
   Reorder,
   useDragControls,
 } from "framer-motion";
-import type { AudioClip, TipPreset, Goals, ProjectionSettings, CurrencyLocale } from "../types";
+import type { AudioClip, TipPreset, Goals, ProjectionSettings, CurrencyLocale, BankSettings } from "../types";
 import {
   playCoinSound,
   playTadaSound,
@@ -14,6 +14,7 @@ import {
 } from "../utils/audio";
 import { formatCents, parseDollarsToCents, CURRENCY_LOCALES } from "../utils/currency";
 import { generateId } from "../utils/id";
+import { BANK_OPTIONS } from "../constants/presets";
 
 interface Props {
   isOpen: boolean;
@@ -29,7 +30,9 @@ interface Props {
   currencyLocale: CurrencyLocale;
   onCurrencyLocaleChange: (cl: CurrencyLocale) => void;
   unsentCents: number;
-  onSendToAlly: () => void;
+  onSendToBank: () => void;
+  bankSettings: BankSettings;
+  onBankSettingsChange: (bs: BankSettings) => void;
   onReset: () => void;
   needRefresh: boolean;
   onUpdate: () => void;
@@ -585,7 +588,9 @@ export default function SettingsPanel({
   currencyLocale,
   onCurrencyLocaleChange,
   unsentCents,
-  onSendToAlly,
+  onSendToBank,
+  bankSettings,
+  onBankSettingsChange,
   onReset,
   needRefresh,
   onUpdate,
@@ -651,33 +656,52 @@ export default function SettingsPanel({
 
             {/* Scrollable body */}
             <div className="settings-body">
-              {/* ── Bank ── */}
-              {unsentCents > 0 && (
-                <div className="settings-section settings-section--no-label">
-                  <div className="settings-bank-card">
-                    <div className="settings-bank-card-top">
-                      <span className="settings-bank-icon">🏦</span>
-                      <div className="settings-bank-text">
-                        <span className="settings-bank-label">
-                          Unsent balance
-                        </span>
-                        <span className="settings-bank-amount">
-                          {formatCents(unsentCents, currencyLocale)}
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      className="settings-bank-send-btn"
-                      onClick={() => {
-                        onSendToAlly();
-                        onClose();
-                      }}
-                    >
-                      Send to Ally →
-                    </button>
+              {/* ── Banking ── */}
+              <div className="settings-section">
+                <span className="settings-section-label">BANKING</span>
+
+                {/* Enable toggle */}
+                <div className="settings-bank-toggle-row">
+                  <div className="settings-bank-toggle-text">
+                    <span className="settings-bank-toggle-label">Bank transfers</span>
+                    <span className="settings-bank-toggle-desc">
+                      {bankSettings.enabled ? 'Opens your bank to transfer funds' : 'Mark deposits as sent manually'}
+                    </span>
                   </div>
+                  <button
+                    className={`settings-toggle${bankSettings.enabled ? ' settings-toggle--on' : ''}`}
+                    onClick={() => onBankSettingsChange({ ...bankSettings, enabled: !bankSettings.enabled })}
+                    aria-label={bankSettings.enabled ? 'Disable bank transfers' : 'Enable bank transfers'}
+                  >
+                    <span className="settings-toggle-thumb" />
+                  </button>
                 </div>
-              )}
+
+                {/* Bank selector — only shown when enabled */}
+                {bankSettings.enabled && (
+                  <select
+                    className="settings-locale-select"
+                    value={bankSettings.bankId}
+                    onChange={(e) => onBankSettingsChange({ ...bankSettings, bankId: e.target.value as BankSettings['bankId'] })}
+                  >
+                    {BANK_OPTIONS.map((b) => (
+                      <option key={b.id} value={b.id}>{b.label}</option>
+                    ))}
+                  </select>
+                )}
+
+                {/* Send button — only shown when there's an unsent balance */}
+                {unsentCents > 0 && (
+                  <button
+                    className="settings-bank-send-btn"
+                    onClick={() => { onSendToBank(); onClose(); }}
+                  >
+                    {bankSettings.enabled
+                      ? `Send ${formatCents(unsentCents, currencyLocale)} to Freedom Fund →`
+                      : `Mark ${formatCents(unsentCents, currencyLocale)} as sent to Freedom Fund`}
+                  </button>
+                )}
+              </div>
               <div className="settings-section">
                 <span className="settings-section-label">
                   CELEBRATION SOUND

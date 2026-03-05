@@ -1,6 +1,6 @@
 import { generateId } from '../utils/id'
 import { detectSystemLocale } from '../utils/currency'
-import type { TipPreset, Goals } from '../types'
+import type { TipPreset, Goals, BankSettings } from '../types'
 
 export type { TipPreset }
 
@@ -34,6 +34,15 @@ export const DEFAULT_PROJECTION_SETTINGS = {
 };
 
 export const DEFAULT_CURRENCY_LOCALE = detectSystemLocale();
+
+export const DEFAULT_BANK_SETTINGS: BankSettings = {
+  enabled: false,
+  bankId: 'ally',
+};
+
+export const BANK_OPTIONS: { id: BankSettings['bankId']; label: string; transferUrl: string }[] = [
+  { id: 'ally', label: 'Ally Bank', transferUrl: 'https://secure.ally.com/payments/transfers#' },
+];
 
 // Keep legacy export name so AmountSelector doesn't break before we migrate it
 export const SKIP_PRESETS = DEFAULT_TIP_PRESETS

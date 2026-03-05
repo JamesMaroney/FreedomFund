@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
-import type { FreedomFundState, CurrencyLocale } from "../types";
+import type { FreedomFundState, CurrencyLocale, BankSettings } from "../types";
 import type { ProjectionSettings } from "../types";
 import { formatCents } from "../utils/currency";
 import { useStreak } from "../hooks/useStreak";
@@ -18,8 +18,9 @@ interface Props {
   onInstall: () => void;
   projectionSettings: ProjectionSettings;
   currencyLocale: CurrencyLocale;
+  bankSettings: BankSettings;
   unsentCents: number;
-  onSendToAlly: () => void;
+  onSendToBank: () => void;
 }
 
 // ─── Goal helpers ────────────────────────────────────────────────────────────
@@ -88,8 +89,9 @@ export default function HomeScreen({
   onInstall,
   projectionSettings,
   currencyLocale,
+  bankSettings,
   unsentCents,
-  onSendToAlly,
+  onSendToBank,
 }: Props) {
   const { displayStreak, depositedToday } = useStreak({
     currentStreak: fundState.currentStreak,
@@ -392,10 +394,10 @@ export default function HomeScreen({
           </div>
         </div>
 
-        {/* ── Transfer nudge ── */}
-        {unsentCents > 0 && (
-          <button className="home-transfer-nudge" onClick={onSendToAlly}>
-            Transfer {formatCents(unsentCents, currencyLocale)} to Ally →
+        {/* —— Transfer nudge (only shown when bank transfers enabled) —— */}
+        {bankSettings.enabled && unsentCents > 0 && (
+          <button className="home-transfer-nudge" onClick={onSendToBank}>
+            Transfer {formatCents(unsentCents, currencyLocale)} to Freedom Fund →
           </button>
         )}
 

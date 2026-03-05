@@ -1769,10 +1769,11 @@
 .settings-bank-send-btn {
   display: block;
   width: 100%;
+  margin-top: 10px;
   padding: 11px 14px;
   background: rgba(245, 200, 66, 0.1);
-  border: none;
-  border-top: 1px solid rgba(245, 200, 66, 0.15);
+  border: 1px solid rgba(245, 200, 66, 0.2);
+  border-radius: 10px;
   color: var(--accent-gold);
   font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 0.875rem;
@@ -1784,6 +1785,57 @@
 }
 .settings-bank-send-btn:active {
   background: rgba(245, 200, 66, 0.2);
+}
+
+/* ─── Toggle switch ──────────────────────────────────────────────── */
+.settings-bank-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 10px;
+}
+.settings-bank-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.settings-bank-toggle-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.settings-bank-toggle-desc {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+.settings-toggle {
+  flex-shrink: 0;
+  width: 46px;
+  height: 26px;
+  border-radius: 13px;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 3px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+}
+.settings-toggle--on {
+  background: var(--accent-gold);
+}
+.settings-toggle-thumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 0.2s;
+  transform: translateX(0);
+}
+.settings-toggle--on .settings-toggle-thumb {
+  transform: translateX(20px);
 }
 .settings-bank-send-hint {
   font-weight: 400;
