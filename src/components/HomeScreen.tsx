@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
-import type { FreedomFundState } from "../types";
+import type { FreedomFundState, CurrencyLocale } from "../types";
 import type { ProjectionSettings } from "../types";
 import { formatCents } from "../utils/currency";
 import { useStreak } from "../hooks/useStreak";
@@ -17,6 +17,7 @@ interface Props {
   installPrompt: boolean;
   onInstall: () => void;
   projectionSettings: ProjectionSettings;
+  currencyLocale: CurrencyLocale;
   unsentCents: number;
   onSendToAlly: () => void;
 }
@@ -86,6 +87,7 @@ export default function HomeScreen({
   installPrompt,
   onInstall,
   projectionSettings,
+  currencyLocale,
   unsentCents,
   onSendToAlly,
 }: Props) {
@@ -111,24 +113,24 @@ export default function HomeScreen({
         color: RING_COLORS[0],
         trackColor: RING_TRACKS[0],
         label: "Monthly",
-        valueLabel: `${formatCents(monthlyProg)} / ${formatCents(MONTHLY_GOAL_CENTS)}`,
+        valueLabel: `${formatCents(monthlyProg, currencyLocale)} / ${formatCents(MONTHLY_GOAL_CENTS, currencyLocale)}`,
       },
       {
         progress: weeklyProg / weeklyTarget,
         color: RING_COLORS[1],
         trackColor: RING_TRACKS[1],
         label: "Weekly",
-        valueLabel: `${formatCents(weeklyProg)} / ${formatCents(weeklyTarget)}`,
+        valueLabel: `${formatCents(weeklyProg, currencyLocale)} / ${formatCents(weeklyTarget, currencyLocale)}`,
       },
       {
         progress: dailyProg / DAILY_GOAL_CENTS,
         color: RING_COLORS[2],
         trackColor: RING_TRACKS[2],
         label: "Daily",
-        valueLabel: `${formatCents(dailyProg)} / ${formatCents(DAILY_GOAL_CENTS)}`,
+        valueLabel: `${formatCents(dailyProg, currencyLocale)} / ${formatCents(DAILY_GOAL_CENTS, currencyLocale)}`,
       },
     ],
-    [monthlyProg, weeklyProg, dailyProg, weeklyTarget],
+    [monthlyProg, weeklyProg, dailyProg, weeklyTarget, currencyLocale],
   );
 
   const projections = useMemo(
@@ -257,7 +259,7 @@ export default function HomeScreen({
                       {allValues.map((v, i) => (
                         <div key={i} className="proj-value-row-item">
                           <span className={`proj-bar-value${i === 0 ? ' proj-bar-value--today' : ''}`}>
-                            {formatCents(v)}
+                            {formatCents(v, currencyLocale)}
                           </span>
                           {i < N - 1 && <span className="proj-value-arrow">›</span>}
                         </div>
@@ -265,7 +267,7 @@ export default function HomeScreen({
                     </div>
                     {/* Bar + curve area */}
                     <div className="proj-bars" style={{ height: BAR_H }}>
-                      {allValues.map((v, i) => (
+                      {allValues.map((_v, i) => (
                         <div key={labels[i]} className="proj-bar-col">
                           <div className="proj-bar-track">
                             <motion.div
@@ -300,7 +302,7 @@ export default function HomeScreen({
                   </>
                 );
               })()}
-              <span className="proj-panel-basis">based on {formatCents(fundState.totalSaved)} saved</span>
+              <span className="proj-panel-basis">based on {formatCents(fundState.totalSaved, currencyLocale)} saved</span>
             </div>
             <div className="rings-panel">
               <motion.button
@@ -328,7 +330,7 @@ export default function HomeScreen({
                     animate={{ scale: 1 }}
                     transition={{ type: "spring", stiffness: 300, damping: 18 }}
                   >
-                    {formatCents(fundState.totalSaved)}
+                    {formatCents(fundState.totalSaved, currencyLocale)}
                   </motion.span>
 
                   {displayStreak > 0 && (
@@ -401,7 +403,7 @@ export default function HomeScreen({
         {/* ── Transfer nudge ── */}
         {unsentCents > 0 && (
           <button className="home-transfer-nudge" onClick={onSendToAlly}>
-            Transfer {formatCents(unsentCents)} to Ally →
+            Transfer {formatCents(unsentCents, currencyLocale)} to Ally →
           </button>
         )}
 
@@ -435,7 +437,7 @@ export default function HomeScreen({
         {/* Portrait-only history anchor (fixed bottom sheet) */}
         {!isLandscape && fundState.deposits.length > 0 && (
           <div className="history-anchor">
-            <DepositHistory deposits={fundState.deposits} />
+            <DepositHistory deposits={fundState.deposits} currencyLocale={currencyLocale} />
           </div>
         )}
       </div>
@@ -443,7 +445,7 @@ export default function HomeScreen({
       {/* ── Right column — landscape only ── */}
       {isLandscape && fundState.deposits.length > 0 && (
         <div className="home-history-col">
-          <DepositHistory deposits={fundState.deposits} landscape />
+          <DepositHistory deposits={fundState.deposits} currencyLocale={currencyLocale} landscape />
         </div>
       )}
     </motion.div>

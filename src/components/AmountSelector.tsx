@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import type { TipPreset } from '../types'
+import type { TipPreset, CurrencyLocale } from '../types'
 import { formatCents, parseDollarsToCents } from '../utils/currency'
 
 interface Props {
   tipPresets: TipPreset[]
+  currencyLocale: CurrencyLocale
   onSelect: (amount: number, label: string) => void
   onBack: () => void
 }
 
-export default function AmountSelector({ tipPresets, onSelect, onBack }: Props) {
+export default function AmountSelector({ tipPresets, currencyLocale, onSelect, onBack }: Props) {
   const [customValue, setCustomValue] = useState('')
   const [customError, setCustomError] = useState('')
 
@@ -23,12 +24,8 @@ export default function AmountSelector({ tipPresets, onSelect, onBack }: Props) 
       setCustomError('Enter a valid amount')
       return
     }
-    if (cents > 100000) {
-      setCustomError('Max $1,000 per tip')
-      return
-    }
     setCustomError('')
-    onSelect(cents, `Skipped $${(cents / 100).toFixed(2)} purchase`)
+    onSelect(cents, `Skipped ${formatCents(cents, currencyLocale)} purchase`)
   }
 
   return (
@@ -57,7 +54,7 @@ export default function AmountSelector({ tipPresets, onSelect, onBack }: Props) 
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
           >
             <span className="chip-emoji">{preset.emoji}</span>
-            <span className="chip-amount">{formatCents(preset.amount)}</span>
+            <span className="chip-amount">{formatCents(preset.amount, currencyLocale)}</span>
             <span className="chip-label">{preset.label}</span>
           </motion.button>
         ))}

@@ -2,19 +2,21 @@ import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { generateParticles } from '../utils/confetti'
 import { formatCents } from '../utils/currency'
+import type { CurrencyLocale } from '../types'
 
 
 interface Props {
   amount: number
   label: string
   isMilestone: boolean
+  currencyLocale: CurrencyLocale
   onComplete: () => void
 }
 
 const PARTICLES = generateParticles(30)
 const MILESTONE_PARTICLES = generateParticles(55)
 
-export default function CelebrationOverlay({ amount, label, isMilestone, onComplete }: Props) {
+export default function CelebrationOverlay({ amount, label, isMilestone, currencyLocale, onComplete }: Props) {
   const particles = isMilestone ? MILESTONE_PARTICLES : PARTICLES
   // Pin onComplete in a ref so the timer never resets if parent re-renders
   const onCompleteRef = useRef(onComplete)
@@ -81,7 +83,7 @@ export default function CelebrationOverlay({ amount, label, isMilestone, onCompl
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 18, delay: 0.05 }}
         >
-          +{formatCents(amount)}
+          +{formatCents(amount, currencyLocale)}
         </motion.div>
 
         <motion.div

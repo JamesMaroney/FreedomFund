@@ -1,5 +1,8 @@
 export type AudioClip = 'coins' | 'tada' | 'spring' | 'random' | 'off';
 
+import type { CurrencyLocale } from './utils/currency';
+export type { CurrencyLocale };
+
 export interface TipPreset {
   id: string;       // stable uuid
   amount: number;   // in cents
@@ -38,6 +41,7 @@ export interface FreedomFundState {
   goals: Goals;
   tipPresets: TipPreset[];
   projectionSettings: ProjectionSettings;
+  currencyLocale?: CurrencyLocale;
 }
 
 export type AppScreen =

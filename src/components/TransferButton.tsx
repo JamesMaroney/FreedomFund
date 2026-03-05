@@ -2,12 +2,13 @@ import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { formatCents } from "../utils/currency";
 import { calcProjections } from "../utils/projection";
-import type { ProjectionSettings } from "../types";
+import type { ProjectionSettings, CurrencyLocale } from "../types";
 
 interface Props {
   amount: number;
   totalSavedCents: number;
   projectionSettings: ProjectionSettings;
+  currencyLocale: CurrencyLocale;
   onTransfer: () => void;
   onSkip: () => void;
 }
@@ -20,7 +21,7 @@ function openAlly() {
   window.open(ALLY_FALLBACK, "_blank", "noopener,noreferrer");
 }
 
-export default function TransferButton({ amount, totalSavedCents, projectionSettings, onTransfer, onSkip }: Props) {
+export default function TransferButton({ amount, totalSavedCents, projectionSettings, currencyLocale, onTransfer, onSkip }: Props) {
   const onSkipRef = useRef(onSkip);
   onSkipRef.current = onSkip;
 
@@ -48,7 +49,7 @@ export default function TransferButton({ amount, totalSavedCents, projectionSett
         <div className="transfer-checkmark">✓</div>
         <h2 className="transfer-heading">Nice skip!</h2>
         <p className="transfer-subheading">
-          <span className="transfer-amount">{formatCents(amount)}</span> added
+          <span className="transfer-amount">{formatCents(amount, currencyLocale)}</span> added
           to your Freedom Fund.
         </p>
         <p className="transfer-cta-label">Ready to move the real money?</p>
@@ -67,7 +68,7 @@ export default function TransferButton({ amount, totalSavedCents, projectionSett
               {projections.map((p) => (
                 <div key={p.years} className="celebration-proj-row">
                   <span className="celebration-proj-years">{p.years}yr</span>
-                  <span className="celebration-proj-value">{formatCents(p.valueCents)}</span>
+                  <span className="celebration-proj-value">{formatCents(p.valueCents, currencyLocale)}</span>
                 </div>
               ))}
             </div>

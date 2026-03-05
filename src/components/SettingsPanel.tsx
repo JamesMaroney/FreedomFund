@@ -5,14 +5,14 @@ import {
   Reorder,
   useDragControls,
 } from "framer-motion";
-import type { AudioClip, TipPreset, Goals, ProjectionSettings } from "../types";
+import type { AudioClip, TipPreset, Goals, ProjectionSettings, CurrencyLocale } from "../types";
 import {
   playCoinSound,
   playTadaSound,
   playSpringSound,
   primeAudio,
 } from "../utils/audio";
-import { formatCents, parseDollarsToCents } from "../utils/currency";
+import { formatCents, parseDollarsToCents, CURRENCY_LOCALES } from "../utils/currency";
 import { generateId } from "../utils/id";
 
 interface Props {
@@ -26,6 +26,8 @@ interface Props {
   onTipPresetsChange: (p: TipPreset[]) => void;
   projectionSettings: ProjectionSettings;
   onProjectionSettingsChange: (ps: ProjectionSettings) => void;
+  currencyLocale: CurrencyLocale;
+  onCurrencyLocaleChange: (cl: CurrencyLocale) => void;
   unsentCents: number;
   onSendToAlly: () => void;
   onReset: () => void;
@@ -149,6 +151,7 @@ interface PresetItemProps {
   isEditing: boolean;
   isDirty: boolean;
   emojiPickerId: string | null;
+  currencyLocale: CurrencyLocale;
   onToggleEdit: (id: string) => void;
   onUpdate: (id: string, patch: Partial<TipPreset>) => void;
   onSave: (id: string) => void;
@@ -161,6 +164,7 @@ function PresetItem({
   isEditing,
   isDirty,
   emojiPickerId,
+  currencyLocale,
   onToggleEdit,
   onUpdate,
   onSave,
@@ -200,7 +204,7 @@ function PresetItem({
         <span className="settings-preset-emoji">{preset.emoji}</span>
         <span className="settings-preset-name">{preset.label}</span>
         <span className="settings-preset-amount">
-          {formatCents(preset.amount)}
+          {formatCents(preset.amount, currencyLocale)}
         </span>
         <span className="settings-preset-chevron">{isEditing ? "▲" : "▼"}</span>
       </button>
@@ -349,9 +353,11 @@ function PresetItem({
 function TipPresetsSection({
   presets,
   onChange,
+  currencyLocale,
 }: {
   presets: TipPreset[];
   onChange: (p: TipPreset[]) => void;
+  currencyLocale: CurrencyLocale;
 }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [emojiPickerId, setEmojiPickerId] = useState<string | null>(null);
@@ -429,6 +435,7 @@ function TipPresetsSection({
             isEditing={editingId === preset.id}
             isDirty={dirtyIds.has(preset.id)}
             emojiPickerId={emojiPickerId}
+            currencyLocale={currencyLocale}
             onToggleEdit={toggleEdit}
             onUpdate={update}
             onSave={save}
@@ -513,6 +520,52 @@ function ProjectionSection({
   );
 }
 
+// ─── Currency / Locale section ────────────────────────────────────────────────
+
+function LocaleSection({
+  currencyLocale,
+  onChange,
+}: {
+  currencyLocale: CurrencyLocale;
+  onChange: (cl: CurrencyLocale) => void;
+}) {
+  const currentKey = `${currencyLocale.locale}|${currencyLocale.currency}`;
+
+  return (
+    <div className="settings-section">
+      <div className="settings-section-label settings-locale-header">
+        <span>CURRENCY</span>
+        <span className="settings-locale-preview">{formatCents(123456, currencyLocale)}</span>
+      </div>
+      <select
+        className="settings-locale-select"
+        value={currentKey}
+        onChange={(e) => {
+          const [locale, currency] = e.target.value.split('|');
+          onChange({ locale, currency });
+        }}
+      >
+        {CURRENCY_LOCALES.map((opt) => {
+          const key = `${opt.locale}|${opt.currency}`;
+          return (
+            <option key={key} value={key}>
+              {opt.label}
+            </option>
+          );
+        })}
+        {/* If the detected system locale isn't in the list, add it */}
+        {!CURRENCY_LOCALES.some(
+          (o) => o.locale === currencyLocale.locale && o.currency === currencyLocale.currency,
+        ) && (
+          <option value={currentKey}>
+            {currencyLocale.locale} — {currencyLocale.currency} (system)
+          </option>
+        )}
+      </select>
+    </div>
+  );
+}
+
 // ─── Main panel ──────────────────────────────────────────────────────────────
 
 export default function SettingsPanel({
@@ -526,6 +579,8 @@ export default function SettingsPanel({
   onTipPresetsChange,
   projectionSettings,
   onProjectionSettingsChange,
+  currencyLocale,
+  onCurrencyLocaleChange,
   unsentCents,
   onSendToAlly,
   onReset,
@@ -590,7 +645,7 @@ export default function SettingsPanel({
                           Unsent balance
                         </span>
                         <span className="settings-bank-amount">
-                          {formatCents(unsentCents)}
+                          {formatCents(unsentCents, currencyLocale)}
                         </span>
                       </div>
                     </div>
@@ -658,10 +713,14 @@ export default function SettingsPanel({
               {/* ── Projection ── */}
               <ProjectionSection settings={projectionSettings} onChange={onProjectionSettingsChange} />
 
+              {/* ── Currency ── */}
+              <LocaleSection currencyLocale={currencyLocale} onChange={onCurrencyLocaleChange} />
+
               {/* ── Tip Chips ── */}
               <TipPresetsSection
                 presets={tipPresets}
                 onChange={onTipPresetsChange}
+                currencyLocale={currencyLocale}
               />
 
               {/* ── Danger Zone ── */}

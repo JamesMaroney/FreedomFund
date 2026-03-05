@@ -1,4 +1,5 @@
 import { generateId } from '../utils/id'
+import { detectSystemLocale } from '../utils/currency'
 import type { TipPreset, Goals } from '../types'
 
 export type { TipPreset }
@@ -31,6 +32,8 @@ export const DEFAULT_PROJECTION_SETTINGS = {
   annualRatePct: 7,
   horizons: [10, 20, 30] as [number, number, number],
 };
+
+export const DEFAULT_CURRENCY_LOCALE = detectSystemLocale();
 
 // Keep legacy export name so AmountSelector doesn't break before we migrate it
 export const SKIP_PRESETS = DEFAULT_TIP_PRESETS

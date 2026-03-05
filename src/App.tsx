@@ -12,6 +12,7 @@ import type {
   TipPreset,
   Goals,
   ProjectionSettings,
+  CurrencyLocale,
 } from "./types";
 import {
   MILESTONE_AMOUNTS,
@@ -19,7 +20,9 @@ import {
   DEFAULT_TIP_PRESETS,
   DEFAULT_GOALS,
   DEFAULT_PROJECTION_SETTINGS,
+  DEFAULT_CURRENCY_LOCALE,
 } from "./constants/presets";
+import { formatCents } from "./utils/currency";
 import { generateId } from "./utils/id";
 import { primeAudio } from "./utils/audio";
 import HomeScreen from "./components/HomeScreen";
@@ -41,6 +44,7 @@ const DEFAULT_FUND_STATE: FreedomFundState = {
   goals: DEFAULT_GOALS,
   tipPresets: DEFAULT_TIP_PRESETS,
   projectionSettings: DEFAULT_PROJECTION_SETTINGS,
+  currencyLocale: DEFAULT_CURRENCY_LOCALE,
 };
 
 function uiReducer(state: AppUIState, action: AppAction): AppUIState {
@@ -228,6 +232,7 @@ export default function App() {
             installPrompt={installPrompt !== null}
             onInstall={handleInstallPWA}
             projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
+            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
             unsentCents={fundState.deposits
               .filter((d) => !d.transferred)
               .reduce((sum, d) => sum + d.amount, 0)}
@@ -250,6 +255,7 @@ export default function App() {
           <AmountSelector
             key="selector"
             tipPresets={fundState.tipPresets ?? DEFAULT_TIP_PRESETS}
+            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
             onSelect={handleSelectAmount}
             onBack={handleDismiss}
           />
@@ -260,6 +266,7 @@ export default function App() {
             amount={ui.pendingAmount}
             label={ui.pendingLabel}
             isMilestone={!!milestoneHit}
+            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
             onComplete={handleCelebrationComplete}
           />
         )}
@@ -269,6 +276,7 @@ export default function App() {
             amount={ui.pendingAmount}
             totalSavedCents={fundState.totalSaved}
             projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
+            currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
             onTransfer={handleMarkTransferred}
             onSkip={handleDismiss}
           />
@@ -310,7 +318,7 @@ export default function App() {
                     const cents = fundState.deposits
                       .filter((d) => !d.transferred)
                       .reduce((sum, d) => sum + d.amount, 0);
-                    return `$${(cents / 100).toFixed(2)}`;
+                    return formatCents(cents, fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE);
                   })()}
                 </span>{" "}
                 go through?
@@ -359,6 +367,10 @@ export default function App() {
         projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
         onProjectionSettingsChange={(ps: ProjectionSettings) =>
           setFundState((prev) => ({ ...prev, projectionSettings: ps }))
+        }
+        currencyLocale={fundState.currencyLocale ?? DEFAULT_CURRENCY_LOCALE}
+        onCurrencyLocaleChange={(cl: CurrencyLocale) =>
+          setFundState((prev) => ({ ...prev, currencyLocale: cl }))
         }
         unsentCents={fundState.deposits
           .filter((d) => !d.transferred)

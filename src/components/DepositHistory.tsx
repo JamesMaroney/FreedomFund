@@ -1,10 +1,11 @@
 import { useRef, useEffect, useCallback, useState } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
-import type { Deposit } from "../types";
+import type { Deposit, CurrencyLocale } from "../types";
 import { formatCents } from "../utils/currency";
 
 interface Props {
   deposits: Deposit[];
+  currencyLocale: CurrencyLocale;
   landscape?: boolean;
 }
 
@@ -25,7 +26,7 @@ function formatRelativeTime(isoString: string): string {
   return `${diffDays}d ago`;
 }
 
-function DepositItem({ deposit, index }: { deposit: Deposit; index: number }) {
+function DepositItem({ deposit, index, currencyLocale }: { deposit: Deposit; index: number; currencyLocale: CurrencyLocale }) {
   return (
     <motion.li
       className="history-item"
@@ -35,7 +36,7 @@ function DepositItem({ deposit, index }: { deposit: Deposit; index: number }) {
     >
       <span className="history-label">{deposit.label}</span>
       <div className="history-right">
-        <span className="history-amount">{formatCents(deposit.amount)}</span>
+        <span className="history-amount">{formatCents(deposit.amount, currencyLocale)}</span>
         <span className="history-time">
           {formatRelativeTime(deposit.timestamp)}
         </span>
@@ -49,7 +50,7 @@ function DepositItem({ deposit, index }: { deposit: Deposit; index: number }) {
   );
 }
 
-export default function DepositHistory({ deposits, landscape }: Props) {
+export default function DepositHistory({ deposits, currencyLocale, landscape }: Props) {
   const expandedH = () => window.innerHeight * EXPANDED_VH;
   const collapsedH = () => 44 + Math.min(deposits.length, COLLAPSED_COUNT) * 57;
 
@@ -63,7 +64,7 @@ export default function DepositHistory({ deposits, landscape }: Props) {
         <div className="history-list-wrap" style={{ touchAction: "pan-y" }}>
           <ul className="history-list">
             {deposits.map((deposit, i) => (
-              <DepositItem key={deposit.id} deposit={deposit} index={i} />
+              <DepositItem key={deposit.id} deposit={deposit} index={i} currencyLocale={currencyLocale} />
             ))}
           </ul>
         </div>
@@ -212,7 +213,7 @@ export default function DepositHistory({ deposits, landscape }: Props) {
       >
         <ul className="history-list">
           {deposits.map((deposit, i) => (
-            <DepositItem key={deposit.id} deposit={deposit} index={i} />
+            <DepositItem key={deposit.id} deposit={deposit} index={i} currencyLocale={currencyLocale} />
           ))}
         </ul>
 
