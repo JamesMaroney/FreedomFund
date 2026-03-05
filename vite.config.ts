@@ -4,6 +4,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 import basicSsl from '@vitejs/plugin-basic-ssl'
 import { execSync } from 'child_process'
 
+/// <reference types="vitest" />
+
 const isProd = process.env.NODE_ENV === 'production'
 const gitHash = execSync('git rev-parse HEAD').toString().trim().slice(0, 7)
 const buildNumber = execSync('git rev-list --count HEAD').toString().trim()
@@ -14,6 +16,15 @@ export default defineConfig({
   define: {
     __GIT_HASH__: JSON.stringify(gitHash),
     __BUILD_NUMBER__: JSON.stringify(buildNumber),
+  },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      include: ['src/utils/**', 'src/hooks/useStreak.ts', 'src/store/**'],
+    },
   },
   plugins: [
     !isProd && basicSsl(),
