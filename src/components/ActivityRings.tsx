@@ -66,27 +66,8 @@ function ActivityRings({
       width={size}
       height={size}
       viewBox={`0 0 ${size} ${size}`}
-      style={{ overflow: "visible" }}
       aria-hidden="true"
     >
-      <defs>
-        {rings.map((_ring, i) => (
-          <filter
-            key={i}
-            id={`glow-${i}`}
-            x="-100%"
-            y="-100%"
-            width="300%"
-            height="300%"
-          >
-            <feGaussianBlur stdDeviation="3" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        ))}
-      </defs>
 
       {rings.map((ring, i) => {
         const r = radii[i];
@@ -128,7 +109,6 @@ function ActivityRings({
                     strokeLinecap="butt"
                     strokeDasharray={lapCircumference}
                     transform={`rotate(-90 ${cx} ${cy})`}
-                    filter={`url(#glow-${i})`}
                     initial={{ strokeDashoffset: lapCircumference }}
                     animate={{ strokeDashoffset: 0 }}
                     transition={
@@ -193,7 +173,7 @@ function ActivityRings({
                 });
 
                 return (
-                  <g filter={`url(#glow-${i})`}>
+                  <g>
                     {/* Spike lines */}
                     {spikes.map((s, k) => (
                       <motion.line
