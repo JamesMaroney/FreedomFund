@@ -251,6 +251,13 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Rings SVG: use a lightweight CSS filter for glow instead of SVG feGaussianBlur
+   (SVG filters on animated elements can crash the Chrome GPU process) */
+.rings-btn svg {
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.08));
+  overflow: hidden;
+}
+
 /* ─── Centre content overlaid on the rings ───────────────────────── */
 
 .rings-centre {
