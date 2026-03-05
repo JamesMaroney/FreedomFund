@@ -27,5 +27,10 @@ export const MILESTONE_AMOUNTS = [50, 100, 250, 500, 1000, 2000, 5000];
 
 export const DEFAULT_WEEKLY_GOAL_CENTS = 10000; // $100
 
+export const DEFAULT_PROJECTION_SETTINGS = {
+  annualRatePct: 7,
+  horizons: [10, 20, 30] as [number, number, number],
+};
+
 // Keep legacy export name so AmountSelector doesn't break before we migrate it
 export const SKIP_PRESETS = DEFAULT_TIP_PRESETS

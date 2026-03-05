@@ -11,12 +11,14 @@ import type {
   AudioClip,
   TipPreset,
   Goals,
+  ProjectionSettings,
 } from "./types";
 import {
   MILESTONE_AMOUNTS,
   DEFAULT_WEEKLY_GOAL_CENTS,
   DEFAULT_TIP_PRESETS,
   DEFAULT_GOALS,
+  DEFAULT_PROJECTION_SETTINGS,
 } from "./constants/presets";
 import { generateId } from "./utils/id";
 import { primeAudio } from "./utils/audio";
@@ -38,6 +40,7 @@ const DEFAULT_FUND_STATE: FreedomFundState = {
   challengeStartDate: getTodayString(),
   goals: DEFAULT_GOALS,
   tipPresets: DEFAULT_TIP_PRESETS,
+  projectionSettings: DEFAULT_PROJECTION_SETTINGS,
 };
 
 function uiReducer(state: AppUIState, action: AppAction): AppUIState {
@@ -224,6 +227,7 @@ export default function App() {
             onOpenSettings={() => setSettingsOpen(true)}
             installPrompt={installPrompt !== null}
             onInstall={handleInstallPWA}
+            projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
             unsentCents={fundState.deposits
               .filter((d) => !d.transferred)
               .reduce((sum, d) => sum + d.amount, 0)}
@@ -263,6 +267,8 @@ export default function App() {
           <TransferButton
             key="transfer"
             amount={ui.pendingAmount}
+            totalSavedCents={fundState.totalSaved}
+            projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
             onTransfer={handleMarkTransferred}
             onSkip={handleDismiss}
           />
@@ -349,6 +355,10 @@ export default function App() {
         tipPresets={fundState.tipPresets ?? DEFAULT_TIP_PRESETS}
         onTipPresetsChange={(p: TipPreset[]) =>
           setFundState((prev) => ({ ...prev, tipPresets: p }))
+        }
+        projectionSettings={fundState.projectionSettings ?? DEFAULT_PROJECTION_SETTINGS}
+        onProjectionSettingsChange={(ps: ProjectionSettings) =>
+          setFundState((prev) => ({ ...prev, projectionSettings: ps }))
         }
         unsentCents={fundState.deposits
           .filter((d) => !d.transferred)

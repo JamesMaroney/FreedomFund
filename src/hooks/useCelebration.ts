@@ -25,8 +25,10 @@ interface UseCelebrationOptions {
 
 export function useCelebration(audioClip: AudioClip = 'coins') {
   const trigger = useCallback(({ isMilestone = false }: UseCelebrationOptions = {}) => {
-    // Milestones always play ta-da regardless of setting; regular uses selected clip
-    void (isMilestone ? playTadaSound() : resolveClip(audioClip)())
+    if (audioClip !== 'off') {
+      // Milestones always play ta-da regardless of setting; regular uses selected clip
+      void (isMilestone ? playTadaSound() : resolveClip(audioClip)())
+    }
     if (isMilestone) {
       milestoneVibration()
     } else {

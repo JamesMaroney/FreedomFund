@@ -5,7 +5,7 @@ import {
   Reorder,
   useDragControls,
 } from "framer-motion";
-import type { AudioClip, TipPreset, Goals } from "../types";
+import type { AudioClip, TipPreset, Goals, ProjectionSettings } from "../types";
 import {
   playCoinSound,
   playTadaSound,
@@ -24,6 +24,8 @@ interface Props {
   onGoalsChange: (g: Goals) => void;
   tipPresets: TipPreset[];
   onTipPresetsChange: (p: TipPreset[]) => void;
+  projectionSettings: ProjectionSettings;
+  onProjectionSettingsChange: (ps: ProjectionSettings) => void;
   unsentCents: number;
   onSendToAlly: () => void;
   onReset: () => void;
@@ -58,6 +60,12 @@ const AUDIO_OPTIONS: {
     label: "Random",
     emoji: "🎲",
     description: "Surprise me each time",
+  },
+  {
+    value: "off",
+    label: "Off",
+    emoji: "🔇",
+    description: "No sound",
   },
 ];
 
@@ -439,6 +447,72 @@ function TipPresetsSection({
   );
 }
 
+// ─── Projection section ──────────────────────────────────────────────────────
+
+function ProjectionSection({
+  settings,
+  onChange,
+}: {
+  settings: ProjectionSettings;
+  onChange: (ps: ProjectionSettings) => void;
+}) {
+  const updateHorizon = (i: 0 | 1 | 2, val: string) => {
+    const n = parseInt(val, 10);
+    if (!n || n < 1 || n > 99) return;
+    const next: [number, number, number] = [...settings.horizons] as [number, number, number];
+    next[i] = n;
+    onChange({ ...settings, horizons: next });
+  };
+
+  return (
+    <div className="settings-section">
+      <span className="settings-section-label">PROJECTION</span>
+      <div className="settings-projection-grid">
+        <div className="settings-goal-row">
+          <label className="settings-goal-label">Return rate</label>
+          <div className="settings-goal-input-wrap">
+            <input
+              className="settings-goal-input"
+              type="number"
+              inputMode="decimal"
+              min={0}
+              max={100}
+              step={0.1}
+              defaultValue={settings.annualRatePct}
+              onBlur={(e) => {
+                const v = parseFloat(e.target.value);
+                if (!isNaN(v) && v >= 0 && v <= 100)
+                  onChange({ ...settings, annualRatePct: v });
+                else e.target.value = String(settings.annualRatePct);
+              }}
+              onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+            />
+            <span className="settings-goal-dollar">%</span>
+          </div>
+        </div>
+        <div className="settings-projection-horizons">
+          <label className="settings-goal-label">Horizons (years)</label>
+          <div className="settings-projection-horizon-inputs">
+            {([0, 1, 2] as const).map((i) => (
+              <input
+                key={i}
+                className="settings-goal-input settings-horizon-input"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={99}
+                defaultValue={settings.horizons[i]}
+                onBlur={(e) => updateHorizon(i, e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') (e.target as HTMLInputElement).blur(); }}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main panel ──────────────────────────────────────────────────────────────
 
 export default function SettingsPanel({
@@ -450,6 +524,8 @@ export default function SettingsPanel({
   onGoalsChange,
   tipPresets,
   onTipPresetsChange,
+  projectionSettings,
+  onProjectionSettingsChange,
   unsentCents,
   onSendToAlly,
   onReset,
@@ -578,6 +654,9 @@ export default function SettingsPanel({
 
               {/* ── Goals ── */}
               <GoalsSection goals={goals} onChange={onGoalsChange} />
+
+              {/* ── Projection ── */}
+              <ProjectionSection settings={projectionSettings} onChange={onProjectionSettingsChange} />
 
               {/* ── Tip Chips ── */}
               <TipPresetsSection

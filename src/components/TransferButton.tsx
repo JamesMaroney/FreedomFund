@@ -1,9 +1,13 @@
 import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { formatCents } from "../utils/currency";
+import { calcProjections } from "../utils/projection";
+import type { ProjectionSettings } from "../types";
 
 interface Props {
   amount: number;
+  totalSavedCents: number;
+  projectionSettings: ProjectionSettings;
   onTransfer: () => void;
   onSkip: () => void;
 }
@@ -16,9 +20,11 @@ function openAlly() {
   window.open(ALLY_FALLBACK, "_blank", "noopener,noreferrer");
 }
 
-export default function TransferButton({ amount, onTransfer, onSkip }: Props) {
+export default function TransferButton({ amount, totalSavedCents, projectionSettings, onTransfer, onSkip }: Props) {
   const onSkipRef = useRef(onSkip);
   onSkipRef.current = onSkip;
+
+  const projections = calcProjections(totalSavedCents, projectionSettings.annualRatePct, projectionSettings.horizons);
 
   useEffect(() => {
     const timer = setTimeout(() => onSkipRef.current(), AUTO_DISMISS_MS);
@@ -46,6 +52,27 @@ export default function TransferButton({ amount, onTransfer, onSkip }: Props) {
           to your Freedom Fund.
         </p>
         <p className="transfer-cta-label">Ready to move the real money?</p>
+
+        {totalSavedCents > 0 && (
+          <motion.div
+            className="celebration-projections"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+          >
+            <span className="celebration-proj-label">
+              invested at {projectionSettings.annualRatePct}% grows to
+            </span>
+            <div className="celebration-proj-rows">
+              {projections.map((p) => (
+                <div key={p.years} className="celebration-proj-row">
+                  <span className="celebration-proj-years">{p.years}yr</span>
+                  <span className="celebration-proj-value">{formatCents(p.valueCents)}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        )}
 
         <motion.button
           className="transfer-btn"

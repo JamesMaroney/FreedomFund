@@ -769,6 +769,58 @@
   margin-top: 8px;
 }
 
+.celebration-projections {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 260px;
+}
+
+.celebration-proj-label {
+  font-family: "DM Mono", monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.celebration-proj-rows {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.celebration-proj-row {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.celebration-proj-years {
+  font-family: "DM Mono", monospace;
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  opacity: 0.55;
+}
+
+.celebration-proj-value {
+  font-family: "DM Mono", monospace;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--accent-green);
+}
+
 /* ─── Transfer Screen ────────────────────────────────────────────── */
 
 .transfer-screen {
@@ -1034,6 +1086,197 @@
   width: 100%;
   padding: 8px 0;
   text-align: right;
+}
+
+/* ─── Settings: Projection ────────────────────────────────────────── */
+
+.settings-projection-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-projection-horizons {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.settings-projection-horizon-inputs {
+  display: flex;
+  gap: 8px;
+}
+
+.settings-horizon-input {
+  width: 44px !important;
+  text-align: center !important;
+  padding: 6px 4px !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 6px;
+}
+
+/* ─── Carousel: Projection panel ────────────────────────────────── */
+
+.rings-track--3 {
+  width: 300%;
+}
+
+.rings-track--3 .rings-panel {
+  width: 33.3333%;
+}
+
+.projection-panel {
+  justify-content: center;
+  padding: 16px 20px 8px;
+  gap: 16px;
+}
+
+.proj-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.proj-panel-title {
+  font-family: "DM Mono", monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  opacity: 0.6;
+}
+
+.proj-bars {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.proj-bar-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.proj-value-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 0;
+}
+
+.proj-value-row-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  gap: 2px;
+}
+
+.proj-value-arrow {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+.proj-label-row {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 12px;
+}
+
+.proj-label-row .proj-bar-years {
+  flex: 1;
+  text-align: center;
+}
+
+.proj-bar-value {
+  font-family: "DM Mono", monospace;
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--accent-green);
+  white-space: nowrap;
+}
+
+.proj-bar-value--today {
+  color: var(--accent-gold);
+}
+
+.proj-bar-track {
+  width: 100%;
+  height: 100%;
+  border-radius: 6px 6px 4px 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.proj-bar-fill {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 214, 143, 0.75) 0%, rgba(0, 214, 143, 0.35) 100%);
+  border-radius: 6px 6px 4px 4px;
+  transform-origin: bottom;
+}
+
+.proj-bar-fill--today {
+  background: linear-gradient(180deg, rgba(245, 200, 66, 0.75) 0%, rgba(245, 200, 66, 0.35) 100%);
+}
+
+.proj-curve-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.proj-curve-path {
+  fill: none;
+  stroke: rgba(0, 214, 143, 0.55);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.proj-curve-dot {
+  fill: rgba(0, 214, 143, 0.9);
+  stroke: none;
+  r: 3.5;
+}
+
+.proj-curve-dot--today {
+  fill: rgba(245, 200, 66, 0.9);
+}
+
+.proj-bar-years {
+  font-family: "DM Mono", monospace;
+  font-size: 0.62rem;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  letter-spacing: 0.06em;
+}
+
+.proj-panel-basis {
+  font-family: "DM Mono", monospace;
+  font-size: 0.58rem;
+  color: var(--text-secondary);
+  opacity: 0.4;
+  letter-spacing: 0.08em;
 }
 
 /* ─── Settings: Tip Presets ──────────────────────────────────────── */

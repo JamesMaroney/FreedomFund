@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { generateParticles } from '../utils/confetti'
 import { formatCents } from '../utils/currency'
 
+
 interface Props {
   amount: number
   label: string
@@ -99,6 +100,8 @@ export default function CelebrationOverlay({ amount, label, isMilestone, onCompl
         >
           🎉
         </motion.div>
+
+
       </div>
     </motion.div>
   )

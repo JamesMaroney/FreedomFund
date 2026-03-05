@@ -1,12 +1,14 @@
 import { useState, useRef, useMemo, useEffect } from "react";
 import { motion, useMotionValue, animate } from "framer-motion";
 import type { FreedomFundState } from "../types";
+import type { ProjectionSettings } from "../types";
 import { formatCents } from "../utils/currency";
 import { useStreak } from "../hooks/useStreak";
 import { useIsLandscape } from "../hooks/useOrientation";
 import ActivityRings from "./ActivityRings";
 import DepositHistory from "./DepositHistory";
 import { WEEKLY_TARGETS } from "../constants/presets";
+import { calcProjections } from "../utils/projection";
 
 interface Props {
   fundState: FreedomFundState;
@@ -14,6 +16,7 @@ interface Props {
   onOpenSettings: () => void;
   installPrompt: boolean;
   onInstall: () => void;
+  projectionSettings: ProjectionSettings;
   unsentCents: number;
   onSendToAlly: () => void;
 }
@@ -74,7 +77,7 @@ const RING_TRACKS = [
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-const PANEL_COUNT = 2;
+const PANEL_COUNT = 3;
 
 export default function HomeScreen({
   fundState,
@@ -82,6 +85,7 @@ export default function HomeScreen({
   onOpenSettings,
   installPrompt,
   onInstall,
+  projectionSettings,
   unsentCents,
   onSendToAlly,
 }: Props) {
@@ -90,7 +94,7 @@ export default function HomeScreen({
     lastDepositDate: fundState.lastDepositDate,
   });
 
-  const [page, setPage] = useState(0); // 0 = rings, 1 = legend
+  const [page, setPage] = useState(1); // 0 = projections, 1 = rings, 2 = legend
   const containerRef = useRef<HTMLDivElement>(null);
   const containerW = useRef(0); // measured at drag-start
   const x = useMotionValue(0);
@@ -127,7 +131,13 @@ export default function HomeScreen({
     [monthlyProg, weeklyProg, dailyProg, weeklyTarget],
   );
 
+  const projections = useMemo(
+    () => calcProjections(fundState.totalSaved, projectionSettings.annualRatePct, projectionSettings.horizons),
+    [fundState.totalSaved, projectionSettings],
+  );
+
   const [dragLeft, setDragLeft] = useState(-(PANEL_COUNT - 1) * 300);
+  const [dragRight, setDragRight] = useState(300); // allow swiping right to panel 0
   const isLandscape = useIsLandscape();
   const [suppressAnimation, setSuppressAnimation] = useState(false);
   const prevLandscapeRef = useRef(isLandscape);
@@ -139,6 +149,15 @@ export default function HomeScreen({
     const t2 = setTimeout(() => setSuppressAnimation(false), 600);
     return () => { clearTimeout(t1); clearTimeout(t2); };
   }, [isLandscape]);
+
+  // Snap to rings (page 1) on first render
+  useEffect(() => {
+    const w = containerRef.current?.offsetWidth || 300;
+    x.set(-1 * w);
+    setDragLeft(-(PANEL_COUNT - 1) * w);
+    setDragRight(w);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const snapToPage = (target: number) => {
     const w = containerW.current || containerRef.current?.offsetWidth || 300;
@@ -155,6 +174,7 @@ export default function HomeScreen({
     const w = containerRef.current?.offsetWidth ?? 300;
     containerW.current = w;
     setDragLeft(-(PANEL_COUNT - 1) * w);
+    setDragRight(page * w);
   };
 
   const handleDragEnd = (
@@ -199,16 +219,89 @@ export default function HomeScreen({
         <div className="rings-swipe-area" ref={containerRef}>
           {/* Draggable track — both panels sit side-by-side inside */}
           <motion.div
-            className="rings-track"
+            className="rings-track rings-track--3"
             style={{ x }}
             drag="x"
-            dragConstraints={{ left: dragLeft, right: 0 }}
+            dragConstraints={{ left: dragLeft, right: dragRight }}
             dragElastic={0.12}
             dragMomentum={false}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            {/* ── Panel 0: Rings ── */}
+            {/* ── Panel 0: Projections ── */}
+            <div className="rings-panel projection-panel">
+              <div className="proj-panel-header">
+                <span className="proj-panel-title">INVESTED AT {projectionSettings.annualRatePct}%</span>
+              </div>
+              {(() => {
+                const allValues = [fundState.totalSaved, ...projections.map((p) => p.valueCents)];
+                const max = Math.max(...allValues, 1);
+                const BAR_H = 140; // px — height of the bar track area
+                const ratios = allValues.map((v) => v / max);
+                // SVG curve: 4 points, evenly spaced across full width
+                // We render the SVG as an overlay; x positions will use % via viewBox
+                const N = allValues.length; // 4
+                const svgW = 200;
+                const svgH = BAR_H;
+                const xs = allValues.map((_, i) => ((i + 0.5) / N) * svgW);
+                const ys = ratios.map((r) => (1 - r) * svgH);
+                let d = `M ${xs[0]} ${ys[0]}`;
+                for (let i = 1; i < N; i++) {
+                  d += ` L ${xs[i]} ${ys[i]}`;
+                }
+                const labels = ['today', ...projections.map((p) => `${p.years}yr`)];
+                return (
+                  <>
+                    {/* Value row with arrows */}
+                    <div className="proj-value-row">
+                      {allValues.map((v, i) => (
+                        <div key={i} className="proj-value-row-item">
+                          <span className={`proj-bar-value${i === 0 ? ' proj-bar-value--today' : ''}`}>
+                            {formatCents(v)}
+                          </span>
+                          {i < N - 1 && <span className="proj-value-arrow">›</span>}
+                        </div>
+                      ))}
+                    </div>
+                    {/* Bar + curve area */}
+                    <div className="proj-bars" style={{ height: BAR_H }}>
+                      {allValues.map((v, i) => (
+                        <div key={labels[i]} className="proj-bar-col">
+                          <div className="proj-bar-track">
+                            <motion.div
+                              className={`proj-bar-fill${i === 0 ? ' proj-bar-fill--today' : ''}`}
+                              initial={{ scaleY: 0 }}
+                              animate={{ scaleY: ratios[i] }}
+                              transition={{ type: 'spring', stiffness: 120, damping: 18, delay: i * 0.08 }}
+                              style={{ originY: 1 }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                      {/* SVG curve overlay */}
+                      <svg
+                        className="proj-curve-svg"
+                        viewBox={`0 0 ${svgW} ${svgH}`}
+                        preserveAspectRatio="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path d={d} className="proj-curve-path" />
+                        {xs.map((cx, i) => (
+                          <circle key={i} cx={cx} cy={ys[i]} r="4" className={`proj-curve-dot${i === 0 ? ' proj-curve-dot--today' : ''}`} />
+                        ))}
+                      </svg>
+                    </div>
+                    {/* Label row */}
+                    <div className="proj-label-row">
+                      {labels.map((lbl) => (
+                        <span key={lbl} className="proj-bar-years">{lbl}</span>
+                      ))}
+                    </div>
+                  </>
+                );
+              })()}
+              <span className="proj-panel-basis">based on {formatCents(fundState.totalSaved)} saved</span>
+            </div>
             <div className="rings-panel">
               <motion.button
                 className="rings-btn"

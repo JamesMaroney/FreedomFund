@@ -1,4 +1,4 @@
-export type AudioClip = 'coins' | 'tada' | 'spring' | 'random';
+export type AudioClip = 'coins' | 'tada' | 'spring' | 'random' | 'off';
 
 export interface TipPreset {
   id: string;       // stable uuid
@@ -12,6 +12,11 @@ export interface Goals {
   dailyCents: number;
   weeklyCents: number;
   monthlyCents: number;
+}
+
+export interface ProjectionSettings {
+  annualRatePct: number;            // e.g. 7 for 7%
+  horizons: [number, number, number]; // years, e.g. [10, 20, 30]
 }
 
 export interface Deposit {
@@ -32,6 +37,7 @@ export interface FreedomFundState {
   challengeStartDate: string;
   goals: Goals;
   tipPresets: TipPreset[];
+  projectionSettings: ProjectionSettings;
 }
 
 export type AppScreen =
