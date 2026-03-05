@@ -334,22 +334,14 @@ export default function HomeScreen({
                   </motion.span>
 
                   {displayStreak > 0 && (
-                    <motion.div
-                      className="rings-streak"
-                      animate={
-                        depositedToday
-                          ? {
-                              scale: [1, 1.1, 1],
-                              transition: { repeat: Infinity, duration: 2.2 },
-                            }
-                          : {}
-                      }
+                    <div
+                      className={`rings-streak${depositedToday ? " rings-streak--pulse" : ""}`}
                     >
                       <span className="rings-streak-fire">🔥</span>
                       <span className="rings-streak-count">
                         {displayStreak}
                       </span>
-                    </motion.div>
+                    </div>
                   )}
 
                   {!isLandscape && (

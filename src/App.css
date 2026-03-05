@@ -296,6 +296,19 @@
   margin-top: 4px;
 }
 
+.rings-streak--pulse {
+  animation: streak-pulse 2.2s ease-in-out infinite;
+}
+
+@keyframes streak-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.streak-counter--pulse {
+  animation: streak-pulse 2.2s ease-in-out infinite;
+}
+
 .rings-streak-fire {
   font-size: 1rem;
 }
@@ -1983,6 +1996,27 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
+}
+
+/* ─── Reduced motion: honour OS accessibility preference ────────────── */
+@media (prefers-reduced-motion: reduce) {
+  /* Kill all CSS animations and transitions */
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* Explicitly stop the streak pulse loop */
+  .rings-streak--pulse,
+  .streak-counter--pulse {
+    animation: none;
+  }
+
+  /* Suppress CSS drop-shadow filter on rings (GPU paint) */
+  .rings-btn svg {
+    filter: none;
+  }
 }
 
 .settings-reset-cancel-btn:active {
