@@ -99,3 +99,5 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for technical setup, architecture notes
 © 2026 James Maroney. Licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/).
 
 Free to use, share, and adapt — **not for commercial use**. Modifications must be released under the same license. For commercial licensing inquiries, open an issue.
+
+See [CREDITS.md](./CREDITS.md) for full attribution of dependencies, fonts, and tooling.
