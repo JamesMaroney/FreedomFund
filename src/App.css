@@ -25,6 +25,226 @@
   z-index: 0;
 }
 
+/* ─── Welcome / Landing Screen ──────────────────────────────────── */
+
+.welcome-screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 48px 24px 40px;
+  background:
+    radial-gradient(ellipse at 20% 5%,  rgba(245, 200, 66, 0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 90%, rgba(0, 214, 143, 0.07) 0%, transparent 55%),
+    var(--bg-primary);
+}
+
+.welcome-orb {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+.welcome-orb--gold {
+  width: 320px; height: 320px;
+  top: -80px; left: -80px;
+  background: rgba(245, 200, 66, 0.12);
+}
+.welcome-orb--green {
+  width: 280px; height: 280px;
+  bottom: -60px; right: -60px;
+  background: rgba(0, 214, 143, 0.10);
+}
+
+.welcome-inner {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Hero */
+.welcome-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.welcome-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 20px;
+  filter: drop-shadow(0 0 16px rgba(245, 200, 66, 0.35));
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.welcome-tagline {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  max-width: 320px;
+}
+
+.welcome-tagline em {
+  font-style: italic;
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* Steps */
+.welcome-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.welcome-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px 18px;
+}
+
+.welcome-step + .welcome-step {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.welcome-step__icon {
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'DM Mono', monospace;
+  color: var(--accent-gold);
+  background: rgba(245, 200, 66, 0.1);
+  border: 1px solid rgba(245, 200, 66, 0.25);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.welcome-step__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.welcome-step__text strong {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.welcome-step__text span {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Privacy */
+.welcome-privacy {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+/* CTA */
+.welcome-cta {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: var(--accent-gold);
+  color: #0a0a0f;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.welcome-cta:active {
+  filter: brightness(0.9);
+  transform: scale(0.98);
+}
+
+/* Inspired-by line */
+.welcome-inspired {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.55;
+  text-align: center;
+}
+
+.welcome-inspired em {
+  font-style: italic;
+}
+
+.welcome-inspired a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ── Welcome: compact layout for short phones (< 700px tall) ── */
+@media (max-height: 700px) {
+  .welcome-screen {
+    padding: 28px 24px 28px;
+  }
+  .welcome-inner {
+    gap: 20px;
+  }
+  .welcome-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 14px;
+  }
+  .welcome-title {
+    font-size: 1.6rem;
+  }
+  .welcome-tagline {
+    font-size: 0.9rem;
+  }
+  .welcome-step {
+    padding: 12px 16px;
+  }
+  .welcome-cta {
+    padding: 13px;
+  }
+  .welcome-privacy {
+    font-size: 0.73rem;
+  }
+}
+
 /* ─── Home Screen ────────────────────────────────────────────────── */
 
 .home-screen {
@@ -320,6 +540,17 @@
   color: var(--accent-orange);
 }
 
+.rings-first-hint {
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: center;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+}
+
 .rings-tap-hint {
   font-family: "DM Mono", monospace;
   font-size: 0.55rem;
@@ -352,6 +583,7 @@
 }
 
 .rings-panel {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;

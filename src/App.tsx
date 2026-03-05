@@ -28,6 +28,7 @@ import { primeAudio } from "./utils/audio";
 import { getUnsentCents, findNewMilestone, markAllTransferred } from "./utils/deposits";
 import { uiReducer, INITIAL_UI } from "./store/uiReducer";
 import HomeScreen from "./components/HomeScreen";
+import WelcomeScreen from "./components/WelcomeScreen";
 import AmountSelector from "./components/AmountSelector";
 import CelebrationOverlay from "./components/CelebrationOverlay";
 import TransferButton from "./components/TransferButton";
@@ -79,6 +80,7 @@ export default function App() {
   const [transferPending, setTransferPending] = useState(false);
   const [transferModalOpen, setTransferModalOpen] = useState(false);
   const [skipTransferModal, setSkipTransferModal] = useLocalStorage<boolean>("freedom-fund-skip-transfer-modal", false);
+  const [hasSeenWelcome, setHasSeenWelcome] = useLocalStorage<boolean>("freedom-fund-seen-welcome", false);
   const awaitingTransferReturn = useRef(false);
   const [audioClip, setAudioClip] = useLocalStorage<AudioClip>(
     "freedom-fund-audio-clip",
@@ -262,7 +264,13 @@ export default function App() {
   return (
     <div className="app-root">
       <AnimatePresence mode="wait">
-        {ui.screen === "IDLE" && (
+        {!hasSeenWelcome && (
+          <WelcomeScreen
+            key="welcome"
+            onGetStarted={() => setHasSeenWelcome(true)}
+          />
+        )}
+        {hasSeenWelcome && ui.screen === "IDLE" && (
           <HomeScreen
             key="home"
             fundState={fundState}
@@ -277,7 +285,7 @@ export default function App() {
             onSendToBank={handleSendToBank}
           />
         )}
-        {ui.screen === "SELECTING_AMOUNT" && (
+        {hasSeenWelcome && ui.screen === "SELECTING_AMOUNT" && (
           <AmountSelector
             key="selector"
             tipPresets={tipPresets}
@@ -286,7 +294,7 @@ export default function App() {
             onBack={handleDismiss}
           />
         )}
-        {ui.screen === "CELEBRATING" && (
+        {hasSeenWelcome && ui.screen === "CELEBRATING" && (
           <CelebrationOverlay
             key="celebration"
             amount={ui.pendingAmount}
@@ -296,7 +304,7 @@ export default function App() {
             onComplete={handleCelebrationComplete}
           />
         )}
-        {ui.screen === "TRANSFER_PROMPT" && (
+        {hasSeenWelcome && ui.screen === "TRANSFER_PROMPT" && (
           <TransferButton
             key="transfer"
             amount={ui.pendingAmount}

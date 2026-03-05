@@ -281,32 +281,38 @@ export default function HomeScreen({
                 />
 
                 <div className="rings-centre">
-                  <span className="rings-total-label">
-                    {!isLandscape && "TOTAL SAVED"}
-                  </span>
-                  <motion.span
-                    className="rings-total-amount"
-                    key={fundState.totalSaved}
-                    initial={{ scale: 1.18 }}
-                    animate={{ scale: 1 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 18 }}
-                  >
-                    {formatCents(fundState.totalSaved, currencyLocale)}
-                  </motion.span>
-
-                  {displayStreak > 0 && (
-                    <div
-                      className={`rings-streak${depositedToday ? " rings-streak--pulse" : ""}`}
-                    >
-                      <span className="rings-streak-fire">🔥</span>
-                      <span className="rings-streak-count">
-                        {displayStreak}
+                  {fundState.deposits.length === 0 ? (
+                    <span className="rings-first-hint">Tap the rings<br />to get started</span>
+                  ) : (
+                    <>
+                      <span className="rings-total-label">
+                        {!isLandscape && "TOTAL SAVED"}
                       </span>
-                    </div>
-                  )}
+                      <motion.span
+                        className="rings-total-amount"
+                        key={fundState.totalSaved}
+                        initial={{ scale: 1.18 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 18 }}
+                      >
+                        {formatCents(fundState.totalSaved, currencyLocale)}
+                      </motion.span>
 
-                  {!isLandscape && (
-                    <span className="rings-tap-hint">TAP TO FUND</span>
+                      {displayStreak > 0 && (
+                        <div
+                          className={`rings-streak${depositedToday ? " rings-streak--pulse" : ""}`}
+                        >
+                          <span className="rings-streak-fire">🔥</span>
+                          <span className="rings-streak-count">
+                            {displayStreak}
+                          </span>
+                        </div>
+                      )}
+
+                      {!isLandscape && (
+                        <span className="rings-tap-hint">TAP TO FUND</span>
+                      )}
+                    </>
                   )}
                 </div>
               </motion.button>

@@ -52,7 +52,9 @@ Log at least one skip per day to keep your 🔥 streak alive. Miss a day and it 
 
 ### 5. Transfer to savings
 
-When you're ready to move your accumulated balance to savings, tap **Transfer to Ally →**. The exact amount is copied to your clipboard, and Ally Bank opens in a new tab — just paste it into the transfer amount field. Once done, mark it as sent — the balance clears and you start fresh.
+When you're ready to move your accumulated balance to savings, tap the **Transfer** button. The exact amount is copied to your clipboard, and your savings account opens in a new tab — just paste it into the transfer amount field. Once done, mark it as sent — the balance clears and you start fresh.
+
+You can connect a bank in Settings, or just use the app to track your balance and transfer manually whenever you like.
 
 ---
 
@@ -61,6 +63,7 @@ When you're ready to move your accumulated balance to savings, tap **Transfer to
 Open the ☰ menu (top left) to:
 
 - **Set your weekly goal** — defaults to a 12-week escalating challenge starting at $50/week
+- **Connect a bank** — optionally link Ally or another savings account for one-tap transfers
 - **Customize skip presets** — edit the amounts, labels, and emojis that appear when you tap the rings
 - **Reset unsent balance** — zero out accumulated deposits that haven't been transferred yet
 

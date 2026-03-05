@@ -84,13 +84,7 @@ describe('getDailyProgress', () => {
 
 describe('getWeeklyProgress', () => {
   it('sums deposits from this week', () => {
-    const deposits = [
-      makeDeposit({ amount: 1000, timestamp: daysAgo(1) }),
-      makeDeposit({ amount: 500,  timestamp: daysAgo(2) }),
-    ];
-    // Both within last 2 days — should always be within the current Sun-Sat week
-    // unless the test runs exactly on Sunday, in which case daysAgo(2) = last Sat.
-    // We test with just daysAgo(0) to be safe.
+    // Test with just today to avoid Sun-edge-case where daysAgo(2) = last week
     const today = [makeDeposit({ amount: 400, timestamp: daysAgo(0) })];
     expect(getWeeklyProgress(today)).toBe(400);
   });
