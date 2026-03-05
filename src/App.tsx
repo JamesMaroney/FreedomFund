@@ -106,15 +106,44 @@ export default function App() {
   );
   const { trigger: triggerCelebration } = useCelebration(audioClip);
 
+  // updateReady: latches true when a waiting SW is detected, never resets to false
+  // (dismissing the toast hides it but doesn't clear this — settings still shows the button)
+  const [updateReady, setUpdateReady] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
-  } = useRegisterSW();
+  } = useRegisterSW({
+    onRegistered(reg) {
+      // When useRegisterSW detects a waiting worker, mirror it into our own state
+      if (reg?.waiting) {
+        setUpdateReady(true);
+        setToastVisible(true);
+      }
+    },
+  });
+
+  // Also react to needRefresh going true (the normal detection path)
+  useEffect(() => {
+    if (needRefresh) {
+      setUpdateReady(true);
+      setToastVisible(true);
+    }
+  }, [needRefresh]);
 
   const handleUpdate = useCallback(() => updateServiceWorker(true), [updateServiceWorker]);
-  const handleDismissUpdate = useCallback(() => setNeedRefresh(false), [setNeedRefresh]);
+  const handleDismissUpdate = useCallback(() => {
+    setToastVisible(false);
+    setNeedRefresh(false); // stop useRegisterSW re-showing it
+  }, [setNeedRefresh]);
   const handleCheckForUpdates = useCallback(async () => {
     const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg?.waiting) {
+      // There's already a waiting worker (user dismissed the toast earlier)
+      setUpdateReady(true);
+      return;
+    }
     if (reg) await reg.update();
   }, []);
 
@@ -405,11 +434,11 @@ export default function App() {
           a.click();
         }}
         onReset={handleReset}
-        needRefresh={needRefresh}
+        needRefresh={updateReady}
         onUpdate={handleUpdate}
         onCheckForUpdates={handleCheckForUpdates}
       />
-      <UpdateToast needRefresh={needRefresh} onUpdate={handleUpdate} onDismiss={handleDismissUpdate} />
+      <UpdateToast needRefresh={toastVisible} onUpdate={handleUpdate} onDismiss={handleDismissUpdate} />
     </div>
   );
 }
