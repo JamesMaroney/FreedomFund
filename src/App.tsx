@@ -129,12 +129,14 @@ export default function App() {
 
   useEffect(() => {
     const handleVisibility = () => {
-      if (
-        document.visibilityState === "visible" &&
-        awaitingTransferReturn.current
-      ) {
-        awaitingTransferReturn.current = false;
-        setTransferPending(true);
+      if (document.visibilityState === "visible") {
+        // Check for a new service worker every time the app comes into focus
+        navigator.serviceWorker?.getRegistration().then((reg) => reg?.update());
+
+        if (awaitingTransferReturn.current) {
+          awaitingTransferReturn.current = false;
+          setTransferPending(true);
+        }
       }
     };
     document.addEventListener("visibilitychange", handleVisibility);

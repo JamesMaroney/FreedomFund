@@ -954,44 +954,51 @@
 
 .update-toast {
   position: fixed;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 15vh;
+  left: 20px;
+  right: 20px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
   background: var(--bg-elevated);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 40px;
-  padding: 10px 10px 10px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  padding: 20px 20px 16px;
   z-index: 200;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
-  white-space: nowrap;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55);
 }
 
 .update-toast-text {
   font-family: "Plus Jakarta Sans", sans-serif;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-right: 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.update-toast-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
 }
 
 .update-toast-btn {
-  padding: 7px 14px;
-  border-radius: 32px;
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 12px;
   border: none;
   font-family: "Plus Jakarta Sans", sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition: opacity 0.15s;
 }
 .update-toast-btn:active {
-  opacity: 0.8;
+  opacity: 0.75;
 }
 .update-toast-btn--dismiss {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
   color: var(--text-secondary);
 }
 .update-toast-btn--update {
