@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npm run build && gh-pages -d dist -b gh-pages"
+    "deploy": "npm run build && gh-pages -d dist -b gh-pages && node -e \"const{execSync}=require('child_process');const h=execSync('git rev-parse HEAD').toString().trim().slice(0,7);const n=execSync('git rev-list --count HEAD').toString().trim();console.log('\\n✅ Deployed v'+n+' · '+h+'\\n')\""
   },
   "dependencies": {
     "framer-motion": "^12.34.5",
